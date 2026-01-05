@@ -13,10 +13,21 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Resource Files\cards">
+      <UniqueIdentifier>{996067d5-be19-41d6-a39f-40c575c97be3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="assets\Sprite-Skull.png">
+      <Filter>Resource Files\cards</Filter>
+    </Image>
+    <Image Include="assets\Back.png">
+      <Filter>Resource Files\cards</Filter>
+    </Image>
   </ItemGroup>
 </Project>
