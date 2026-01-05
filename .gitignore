@@ -1,0 +1,108 @@
+# ------------------------------------------------------------
+# OS junk
+# ------------------------------------------------------------
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# ------------------------------------------------------------
+# Visual Studio / MSVC
+# ------------------------------------------------------------
+.vs/
+*.VC.db
+*.VC.VC.opendb
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# MSVC build artifacts
+*.obj
+*.pdb
+*.idb
+*.ilk
+*.ipch
+*.iobj
+*.ipdb
+*.tlog
+*.lastbuildstate
+*.log
+
+# Binaries
+*.exe
+*.dll
+*.lib
+*.exp
+*.appx
+*.msi
+
+# ------------------------------------------------------------
+# CMake
+# ------------------------------------------------------------
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+CTestTestfile.cmake
+Makefile
+*.cmake.user
+
+# Common build output dirs
+build/
+out/
+bin/
+lib/
+
+# If you use these preset output paths
+/out/build/
+/out/install/
+/out/*
+
+# ------------------------------------------------------------
+# Ninja / other generators
+# ------------------------------------------------------------
+.ninja_deps
+.ninja_log
+compile_commands.json
+
+# ------------------------------------------------------------
+# vcpkg
+# ------------------------------------------------------------
+# In manifest mode you typically DON'T commit these folders:
+vcpkg_installed/
+vcpkg_buildtrees/
+vcpkg_packages/
+
+# If you keep vcpkg as a submodule inside the repo, ignore its build folders:
+# vcpkg/buildtrees/
+# vcpkg/packages/
+# vcpkg/downloads/
+# vcpkg/installed/
+
+# ------------------------------------------------------------
+# Debug/Release folders (if generated somewhere)
+# ------------------------------------------------------------
+Debug/
+Release/
+RelWithDebInfo/
+MinSizeRel/
+x64/
+x86/
+
+# ------------------------------------------------------------
+# Profiling / sanitizer / crash dumps
+# ------------------------------------------------------------
+*.dmp
+*.etl
+*.vsp
+*.vspx
+*.sap
+*.pgc
+*.pgd
+
+# ------------------------------------------------------------
+# Optional: ignore exported/packed atlases if you generate them
+# (only enable if you don't want them versioned)
+# ------------------------------------------------------------
+# assets/atlases/*.png
+# assets/atlases/*.json
