@@ -1,19 +1,19 @@
+#include "Game.h"
+
 #define SDL_MAIN_USE_CALLBACKS 1  /* use the callbacks instead of main() */
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
 #include <SDL3/SDL_mouse.h>
 
-#include "Game.h"
-
-#include <iostream>
 #include <memory>
+
 
 // Use this renderer to draw into this window every frame.
 static SDL_Window* window = NULL;
 static SDL_Renderer* renderer = NULL;
 
-#define WINDOW_WIDTH 640
-#define WINDOW_HEIGHT 480
+constexpr auto WINDOW_WIDTH = 640;
+constexpr auto WINDOW_HEIGHT = 480;
 
 std::unique_ptr<Game> game;
 
@@ -47,8 +47,8 @@ SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
         return SDL_APP_SUCCESS;  // end the program, reporting success to the OS.
     }
     if (event->type == SDL_EVENT_MOUSE_BUTTON_DOWN) {
-        std::cout << "Mouse pressed" << "\n";
-        
+        SDL_Log("Current Mouse position is: (%f, %f)", event->motion.x, event->motion.y);
+        game->HitTest(event->motion.x, event->motion.y);
     }
     return SDL_APP_CONTINUE;  // carry on with the program!
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "AssetManager.h"
+#include "Card.h"
 
 #include <SDL3/SDL.h>
 #include <memory>
@@ -13,6 +14,8 @@ public:
 
 	int Init();
 	int Run();
+
+	void HitTest(float x, float y);
 private:
 	SDL_Window* m_window;
 	SDL_Renderer* m_renderer;
@@ -20,5 +23,6 @@ private:
 	int m_windowHeight;
 
 	std::unique_ptr<AssetManager> m_assetManager;
+	std::vector<Card> m_cards;
 };
 

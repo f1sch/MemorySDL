@@ -29,7 +29,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="assets\Sprite-Skull.png">
+    <Image Include="assets\Skull.png">
       <Filter>Resource Files\cards</Filter>
     </Image>
     <Image Include="assets\Back.png">
@@ -41,6 +41,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="AssetManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Card.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
