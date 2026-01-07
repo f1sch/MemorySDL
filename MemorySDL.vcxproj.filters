@@ -35,6 +35,9 @@
     <Image Include="assets\Back.png">
       <Filter>Resource Files\cards</Filter>
     </Image>
+    <Image Include="assets\Coffin.png">
+      <Filter>Resource Files\cards</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game.h">

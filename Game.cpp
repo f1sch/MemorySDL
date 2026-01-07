@@ -2,6 +2,7 @@
 #include "AssetManager.h"
 
 #include <memory>
+#include <random>
 
 constexpr auto TEX_WIDTH = 32;
 constexpr auto TEX_HEIGHT = 32;
@@ -21,30 +22,20 @@ int Game::Init()
     m_assetManager = std::make_unique<AssetManager>(m_renderer);
     m_assetManager->LoadTexture("Back", "assets/Back.png");
     m_assetManager->LoadTexture("Skull", "assets/Skull.png");
+    m_assetManager->LoadTexture("Coffin", "assets/Coffin.png");
     
-    // TODO: irgendwo gehen die Koordinaten kaputt, wenn die Größe
-    // des Fensters geändert wird
+    std::vector<std::string> frontCards = { "Skull", "Coffin" };
 
-    auto* tex = m_assetManager->GetTexture("Back");
-    m_cards.push_back(Card{
-        .frontKey = "Skull",
-        .dst = SDL_FRect{static_cast<float>(m_windowWidth / 2), static_cast<float>(m_windowHeight/2), 
-            static_cast<float>(TEX_WIDTH), static_cast<float>(TEX_HEIGHT)},
-        .id = 0
-    });
-    m_cards.push_back(Card{
-        .frontKey = "Skull",
-        .dst = SDL_FRect{100, 100, static_cast<float>(TEX_WIDTH), static_cast<float>(TEX_HEIGHT)},
-        .id = 1
-    });
+    BuildDeck(frontCards);
 
 	return 0;
 }
 
-int Game::Run()
+int Game::Update()
 {
     SDL_FRect dst_rect{};
     const Uint64 now = SDL_GetTicks();
+    static SDL_FRect tiles;
 
     // we'll have some textures move around over a few seconds.
     const float direction = ((now % 2000) >= 1000) ? 1.0f : -1.0f;
@@ -65,20 +56,8 @@ int Game::Run()
     //SDL_RenderTexture(renderer, texture, NULL, &dst_rect);
  
     SDL_GetWindowSize(m_window, &m_windowWidth, &m_windowHeight);
-
-    int margin = 20;
-    for (auto& card : m_cards)
-    {
-        dst_rect.x = ((float)(m_windowWidth - card.dst.w)) / 2.0f - margin;
-        dst_rect.y = ((float)(m_windowHeight - card.dst.h)) / 2.0f;
-        dst_rect.w = (float)card.dst.w;
-        dst_rect.h = (float)card.dst.h;
-        card.dst = dst_rect;
-        SDL_RenderTexture(m_renderer, m_assetManager->GetTexture("Back"), NULL, &dst_rect);
-        
-        margin *= -1;
-    }
-
+    ApplyGridLayout(2, 2);
+    
     // bottom right.
     //dst_rect.x = ((float)(WINDOW_WIDTH - texture_width)) - (100.0f * scale);
     //dst_rect.y = (float)(WINDOW_HEIGHT - texture_height);
@@ -95,7 +74,6 @@ void Game::HitTest(float x, float y)
 {
     // TODO: Koordinaten müssen noch in Screen Coordinates umgewandelt werden
     SDL_Point p = { static_cast<int>(x), static_cast<int>(y) };
-    bool hit = false;
     for (auto& card : m_cards)
     {
         SDL_Rect rect = { 
@@ -104,15 +82,67 @@ void Game::HitTest(float x, float y)
             static_cast<int>(card.dst.w), 
             static_cast<int>(card.dst.h) 
         };
-        hit = SDL_PointInRect(&p, &rect);
-        if (hit)
+        
+        if (SDL_PointInRect(&p, &rect))
         {
-            SDL_Log("Point is in rect!");
-        }
-        auto contains = card.contains(x, y);
-        if (contains)
-        {
-            SDL_Log("Rect contains point!");
+            //SDL_Log("Point is in rect!");
+            card.state = CardState::FaceUp;
         }
     }
+}
+
+void Game::ApplyGridLayout(int rows, int columns)
+{
+    SDL_Texture* back = m_assetManager->GetTexture("Back");
+    float margin = 5.f;
+    float startX = (m_windowWidth / 2.f) - ((TEX_WIDTH * columns) + (margin * (columns - 1)));
+    float startY = (m_windowHeight / 2.f) - ((TEX_HEIGHT * rows) + (margin * (rows - 1)));
+    
+    for (size_t i{}; i < m_cards.size(); ++i)
+    {
+        int row = static_cast<int>(i) / columns;
+        int col = static_cast<int>(i) % columns;
+
+        SDL_Texture* tex = nullptr;
+        if (m_cards.at(i).state == CardState::FaceDown)
+        {
+            tex = back;
+            //tex = m_assetManager->GetTexture(m_cards.at(i).frontKey);
+        }
+        else
+        {
+            tex = m_assetManager->GetTexture(m_cards.at(i).frontKey);
+        }
+    
+        if (tex)
+        {
+
+            m_cards.at(i).dst = SDL_FRect{
+                startX + col * (TEX_WIDTH + margin),
+                startY + row * (TEX_HEIGHT + margin),
+                TEX_WIDTH, TEX_HEIGHT
+            };
+            SDL_RenderTexture(m_renderer, tex, NULL, &m_cards.at(i).dst);
+        }
+    }
+}
+
+// Creates a List of shuffled cards
+void Game::BuildDeck(const std::vector<std::string>& frontKeys)
+{
+    m_cards.clear();
+    m_cards.reserve(frontKeys.size() * 2);
+
+    int id = 0;
+    for (const auto& key : frontKeys)
+    {
+        Card a; a.id = id; a.frontKey = key;
+        Card b; b.id = id; b.frontKey = key;
+        m_cards.push_back(a);
+        m_cards.push_back(b);
+        ++id;
+    }
+
+    std::mt19937 rng{ std::random_device{}() };
+    std::shuffle(m_cards.begin(), m_cards.end(), rng);
 }

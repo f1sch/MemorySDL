@@ -13,9 +13,12 @@ public:
 	~Game();
 
 	int Init();
-	int Run();
+	int Update();
 
 	void HitTest(float x, float y);
+private:
+	void ApplyGridLayout(const int rows, const int columns);
+	void BuildDeck(const std::vector<std::string>& frontKeys);
 private:
 	SDL_Window* m_window;
 	SDL_Renderer* m_renderer;
@@ -24,5 +27,6 @@ private:
 
 	std::unique_ptr<AssetManager> m_assetManager;
 	std::vector<Card> m_cards;
+	//SDL_FRect m_tiles;
 };
 

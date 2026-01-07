@@ -165,6 +165,7 @@ exit /b 0
   </ItemGroup>
   <ItemGroup>
     <Image Include="assets\Back.png" />
+    <Image Include="assets\Coffin.png" />
     <Image Include="assets\Skull.png">
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</DeploymentContent>
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</DeploymentContent>

@@ -7,13 +7,11 @@ enum class CardState { FaceDown, FaceUp, Matched };
 
 struct Card
 {
-	std::string frontKey;
-	CardState state = CardState::FaceDown;
-	//SDL_Texture* texture = nullptr;
-	SDL_FRect dst{}; // coords
 	int id = -1;
-	//bool hovered = false;
-	//bool selected = false;
+	CardState state = CardState::FaceDown;
+	std::string frontKey;
+	SDL_FRect dst{}; // coords
+	float rotation = 0.f;
 
 	bool contains(float x, float y) const
 	{
