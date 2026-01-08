@@ -27,6 +27,8 @@ private:
 
 	std::unique_ptr<AssetManager> m_assetManager;
 	std::vector<Card> m_cards;
-	//SDL_FRect m_tiles;
+
+	// state
+	int m_lastHitCardIdx;
 };
 

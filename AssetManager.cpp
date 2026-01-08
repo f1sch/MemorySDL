@@ -3,10 +3,6 @@
 AssetManager::AssetManager(SDL_Renderer* renderer)
 {
     m_renderer = renderer;
-    //m_textures = NULL;
-    //texture_width = 0;
-    //texture_height = 0;
-
 }
 
 AssetManager::~AssetManager()

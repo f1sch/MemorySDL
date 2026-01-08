@@ -7,7 +7,8 @@ enum class CardState { FaceDown, FaceUp, Matched };
 
 struct Card
 {
-	int id = -1;
+	int uniqueId = -1;
+	int pairId = -1;
 	CardState state = CardState::FaceDown;
 	std::string frontKey;
 	SDL_FRect dst{}; // coords
@@ -18,9 +19,4 @@ struct Card
 		return (x >= dst.x && x <= dst.x + dst.w &&
 				y >= dst.y && y <= dst.y + dst.h);
 	}
-
-	//void render(SDL_Renderer* renderer) const
-	//{
-	//	SDL_RenderTexture(renderer, texture, nullptr, &dst);
-	//}
 };

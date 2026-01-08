@@ -7,9 +7,11 @@
 constexpr auto TEX_WIDTH = 32;
 constexpr auto TEX_HEIGHT = 32;
 
+// TODO: Karten müssen wieder umgedreht werden, wenn es keinen Match gab.
+
 Game::Game(SDL_Window* window, SDL_Renderer* renderer, int width, int height)
     : m_window(window), m_renderer(renderer),
-    m_windowWidth(width), m_windowHeight(height)
+    m_windowWidth(width), m_windowHeight(height), m_lastHitCardIdx(-1)
 {
 }
 
@@ -23,8 +25,10 @@ int Game::Init()
     m_assetManager->LoadTexture("Back", "assets/Back.png");
     m_assetManager->LoadTexture("Skull", "assets/Skull.png");
     m_assetManager->LoadTexture("Coffin", "assets/Coffin.png");
+    m_assetManager->LoadTexture("Candle", "assets/Candle.png");
+    m_assetManager->LoadTexture("Dagger", "assets/Dagger.png");
     
-    std::vector<std::string> frontCards = { "Skull", "Coffin" };
+    std::vector<std::string> frontCards = { "Skull", "Coffin", "Candle", "Dagger"};
 
     BuildDeck(frontCards);
 
@@ -35,7 +39,6 @@ int Game::Update()
 {
     SDL_FRect dst_rect{};
     const Uint64 now = SDL_GetTicks();
-    static SDL_FRect tiles;
 
     // we'll have some textures move around over a few seconds.
     const float direction = ((now % 2000) >= 1000) ? 1.0f : -1.0f;
@@ -56,7 +59,7 @@ int Game::Update()
     //SDL_RenderTexture(renderer, texture, NULL, &dst_rect);
  
     SDL_GetWindowSize(m_window, &m_windowWidth, &m_windowHeight);
-    ApplyGridLayout(2, 2);
+    ApplyGridLayout(2, 4);
     
     // bottom right.
     //dst_rect.x = ((float)(WINDOW_WIDTH - texture_width)) - (100.0f * scale);
@@ -72,22 +75,46 @@ int Game::Update()
 
 void Game::HitTest(float x, float y)
 {
-    // TODO: Koordinaten müssen noch in Screen Coordinates umgewandelt werden
     SDL_Point p = { static_cast<int>(x), static_cast<int>(y) };
-    for (auto& card : m_cards)
+    
+    for (size_t i{}; i < m_cards.size(); ++i)
     {
-        SDL_Rect rect = { 
-            static_cast<int>(card.dst.x), 
-            static_cast<int>(card.dst.y), 
-            static_cast<int>(card.dst.w), 
-            static_cast<int>(card.dst.h) 
-        };
+        Card& card = m_cards.at(i);
+
+        // Only HitTest Cards that are facedown
+        if (card.state != CardState::FaceDown)
+            continue;
         
-        if (SDL_PointInRect(&p, &rect))
-        {
-            //SDL_Log("Point is in rect!");
-            card.state = CardState::FaceUp;
+        // Cancel if no Card was hit
+        if (!card.contains(x, y))
+            continue;
+        
+        // Do nothing if the same Card is clicked repeatedly
+        if (m_lastHitCardIdx == i)
+            return;
+
+        card.state = CardState::FaceUp;
+        
+        // Current Card is the first Card that was clicked
+        if (m_lastHitCardIdx < 0) {
+            m_lastHitCardIdx = i;
+            return;
         }
+
+        Card& lastCardHit = m_cards.at(m_lastHitCardIdx);
+
+        // Only Cards with the same PairId can be matched
+        if (card.pairId == lastCardHit.pairId) {
+            SDL_Log("Matched!");
+            card.state = CardState::Matched;
+            lastCardHit.state = CardState::Matched;
+        } else {
+            SDL_Log("No Match!");
+            card.state = CardState::FaceDown;
+            lastCardHit.state = CardState::FaceDown;
+        }
+        m_lastHitCardIdx = -1;
+        return;
     }
 }
 
@@ -104,19 +131,14 @@ void Game::ApplyGridLayout(int rows, int columns)
         int col = static_cast<int>(i) % columns;
 
         SDL_Texture* tex = nullptr;
-        if (m_cards.at(i).state == CardState::FaceDown)
-        {
+        if (m_cards.at(i).state == CardState::FaceDown) {
             tex = back;
             //tex = m_assetManager->GetTexture(m_cards.at(i).frontKey);
-        }
-        else
-        {
+        } else {
             tex = m_assetManager->GetTexture(m_cards.at(i).frontKey);
         }
     
-        if (tex)
-        {
-
+        if (tex) {
             m_cards.at(i).dst = SDL_FRect{
                 startX + col * (TEX_WIDTH + margin),
                 startY + row * (TEX_HEIGHT + margin),
@@ -133,14 +155,15 @@ void Game::BuildDeck(const std::vector<std::string>& frontKeys)
     m_cards.clear();
     m_cards.reserve(frontKeys.size() * 2);
 
-    int id = 0;
+    int pairId = 0;
+    int uniqueId = 0;
     for (const auto& key : frontKeys)
     {
-        Card a; a.id = id; a.frontKey = key;
-        Card b; b.id = id; b.frontKey = key;
+        Card a; a.uniqueId = uniqueId++; a.pairId = pairId; a.frontKey = key;
+        Card b; b.uniqueId = uniqueId++; b.pairId = pairId; b.frontKey = key;
         m_cards.push_back(a);
         m_cards.push_back(b);
-        ++id;
+        ++pairId;
     }
 
     std::mt19937 rng{ std::random_device{}() };
