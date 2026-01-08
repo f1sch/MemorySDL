@@ -50,8 +50,8 @@ SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
         // TODO: resize layout for cards
     }
     if (event->type == SDL_EVENT_MOUSE_BUTTON_DOWN) {
-        SDL_Log("Current Mouse position is: (%f, %f)", event->motion.x, event->motion.y);
-        game->HitTest(event->motion.x, event->motion.y);
+        SDL_Log("Current Mouse position is: (%f, %f)", event->button.x, event->button.y);
+        game->HitTest(event->button.x, event->button.y);
     }
     return SDL_APP_CONTINUE;  // carry on with the program!
 }

@@ -8,6 +8,7 @@
 
 class Game
 {
+	enum class CardSelected { NoCard, OneCard, TwoCards };
 public:
 	Game(SDL_Window* window, SDL_Renderer* renderer, int width, int height);
 	~Game();
@@ -29,6 +30,10 @@ private:
 	std::vector<Card> m_cards;
 
 	// state
-	int m_lastHitCardIdx;
+	CardSelected m_cardsSelected;
+	int m_firstCardIdx = -1;
+	int m_secondCardIdx = -1;
+	Uint64 m_resolveCardsAtMs = 0;
+	static constexpr Uint64 m_revealDelayMs = 800;
 };
 

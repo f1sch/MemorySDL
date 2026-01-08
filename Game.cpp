@@ -7,11 +7,10 @@
 constexpr auto TEX_WIDTH = 32;
 constexpr auto TEX_HEIGHT = 32;
 
-// TODO: Karten müssen wieder umgedreht werden, wenn es keinen Match gab.
-
 Game::Game(SDL_Window* window, SDL_Renderer* renderer, int width, int height)
     : m_window(window), m_renderer(renderer),
-    m_windowWidth(width), m_windowHeight(height), m_lastHitCardIdx(-1)
+    m_windowWidth(width), m_windowHeight(height), 
+    m_cardsSelected(CardSelected::NoCard)
 {
 }
 
@@ -61,6 +60,25 @@ int Game::Update()
     SDL_GetWindowSize(m_window, &m_windowWidth, &m_windowHeight);
     ApplyGridLayout(2, 4);
     
+    if (m_cardsSelected == CardSelected::TwoCards) {
+        if (SDL_GetTicks() >= m_resolveCardsAtMs) {
+            Card& a = m_cards.at(m_firstCardIdx);
+            Card& b = m_cards.at(m_secondCardIdx);
+
+            if (a.pairId == b.pairId) {
+                a.state = CardState::Matched;
+                b.state = CardState::Matched;
+            } else {
+                a.state = CardState::FaceDown;
+                b.state = CardState::FaceDown;
+            }
+
+            m_firstCardIdx = -1;
+            m_secondCardIdx = -1;
+            m_cardsSelected = CardSelected::NoCard;
+        }
+    }
+
     // bottom right.
     //dst_rect.x = ((float)(WINDOW_WIDTH - texture_width)) - (100.0f * scale);
     //dst_rect.y = (float)(WINDOW_HEIGHT - texture_height);
@@ -75,6 +93,10 @@ int Game::Update()
 
 void Game::HitTest(float x, float y)
 {
+    // HitTests are locked if two Cards are currently faceUp
+    if (m_cardsSelected == CardSelected::TwoCards)
+        return;
+
     SDL_Point p = { static_cast<int>(x), static_cast<int>(y) };
     
     for (size_t i{}; i < m_cards.size(); ++i)
@@ -90,30 +112,21 @@ void Game::HitTest(float x, float y)
             continue;
         
         // Do nothing if the same Card is clicked repeatedly
-        if (m_lastHitCardIdx == i)
+        if (m_cardsSelected == CardSelected::OneCard && m_firstCardIdx == i)
             return;
 
         card.state = CardState::FaceUp;
         
         // Current Card is the first Card that was clicked
-        if (m_lastHitCardIdx < 0) {
-            m_lastHitCardIdx = i;
+        if (m_cardsSelected == CardSelected::NoCard) {
+            m_firstCardIdx = static_cast<int>(i);
+            m_cardsSelected = CardSelected::OneCard;
             return;
         }
 
-        Card& lastCardHit = m_cards.at(m_lastHitCardIdx);
-
-        // Only Cards with the same PairId can be matched
-        if (card.pairId == lastCardHit.pairId) {
-            SDL_Log("Matched!");
-            card.state = CardState::Matched;
-            lastCardHit.state = CardState::Matched;
-        } else {
-            SDL_Log("No Match!");
-            card.state = CardState::FaceDown;
-            lastCardHit.state = CardState::FaceDown;
-        }
-        m_lastHitCardIdx = -1;
+        m_secondCardIdx = static_cast<int>(i);
+        m_cardsSelected = CardSelected::TwoCards;
+        m_resolveCardsAtMs = SDL_GetTicks() + m_revealDelayMs;
         return;
     }
 }
@@ -133,7 +146,6 @@ void Game::ApplyGridLayout(int rows, int columns)
         SDL_Texture* tex = nullptr;
         if (m_cards.at(i).state == CardState::FaceDown) {
             tex = back;
-            //tex = m_assetManager->GetTexture(m_cards.at(i).frontKey);
         } else {
             tex = m_assetManager->GetTexture(m_cards.at(i).frontKey);
         }
