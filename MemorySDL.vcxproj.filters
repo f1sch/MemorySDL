@@ -38,6 +38,18 @@
     <Image Include="assets\Coffin.png">
       <Filter>Resource Files\cards</Filter>
     </Image>
+    <Image Include="assets\Bat.png">
+      <Filter>Resource Files\cards</Filter>
+    </Image>
+    <Image Include="assets\Candle.png">
+      <Filter>Resource Files\cards</Filter>
+    </Image>
+    <Image Include="assets\Dagger.png">
+      <Filter>Resource Files\cards</Filter>
+    </Image>
+    <Image Include="assets\Door.png">
+      <Filter>Resource Files\cards</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game.h">

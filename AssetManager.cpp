@@ -13,10 +13,12 @@ AssetManager::~AssetManager()
     }
 }
 
-int AssetManager::LoadTexture(const std::string& key, const std::string& path)
+int AssetManager::LoadTexture(const std::string& key)
 {
     SDL_Surface* surface = NULL;
     char* png_path = NULL;
+    std::string path = "assets/";
+    std::string imageType = ".png";
     // Textures are pixel data that we upload to the video hardware for fast drawing. Lots of 2D
     // engines refer to these as "sprites." We'll do a static texture (upload once, draw many
     // times) with data from a bitmap file.
@@ -24,8 +26,7 @@ int AssetManager::LoadTexture(const std::string& key, const std::string& path)
     // SDL_Surface is pixel data the CPU can access. SDL_Texture is pixel data the GPU can access. 
     // Load a .png into a surface, move it to a texture from there.
     
-    //auto tex = IMG_LoadTexture(renderer, "assets\\Sprite-Skull.png");
-    SDL_asprintf(&png_path, "%s%s", SDL_GetBasePath(), path.c_str());  // allocate a string of the full file path
+    SDL_asprintf(&png_path, "%s%s%s%s", SDL_GetBasePath(), path.c_str(), key.c_str(), imageType.c_str());  // allocate a string of the full file path
     surface = SDL_LoadPNG(png_path);
     if (!surface) {
         SDL_Log("Couldn't load bitmap: %s", SDL_GetError());
@@ -51,10 +52,9 @@ int AssetManager::LoadTexture(const std::string& key, const std::string& path)
 SDL_Texture* AssetManager::GetTexture(const std::string& key) const
 {
     std::unordered_map<std::string, SDL_Texture*>::const_iterator it = m_textures.find(key);
+    
     if (it == m_textures.end())
-    {
         SDL_Log("Texture not found");
-    }
     
     return it->second;
 }

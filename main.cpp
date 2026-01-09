@@ -15,12 +15,11 @@ static SDL_Renderer* renderer = NULL;
 constexpr auto WINDOW_WIDTH = 640;
 constexpr auto WINDOW_HEIGHT = 480;
 
-std::unique_ptr<Game> game;
+std::unique_ptr<Game> game = nullptr;
 
 // This function runs once at startup.
 SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
 {
-    
     SDL_SetAppMetadata("Spooky Memory", "0.1", "com.example.renderer-textures");
 
     if (!SDL_Init(SDL_INIT_VIDEO)) {
@@ -32,7 +31,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
         SDL_Log("Couldn't create window/renderer: %s", SDL_GetError());
         return SDL_APP_FAILURE;
     }
-    SDL_SetRenderLogicalPresentation(renderer, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_LOGICAL_PRESENTATION_LETTERBOX);
+    //SDL_SetRenderLogicalPresentation(renderer, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_LOGICAL_PRESENTATION_INTEGER_SCALE);
     
     game = std::make_unique<Game>(window, renderer, WINDOW_WIDTH, WINDOW_HEIGHT);
     game->Init();
@@ -48,6 +47,7 @@ SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
     }
     if (event->type == SDL_EVENT_WINDOW_RESIZED) {
         // TODO: resize layout for cards
+        game->Resize();
     }
     if (event->type == SDL_EVENT_MOUSE_BUTTON_DOWN) {
         SDL_Log("Current Mouse position is: (%f, %f)", event->button.x, event->button.y);

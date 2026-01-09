@@ -16,6 +16,8 @@ public:
 	int Init();
 	int Update();
 
+	void Resize();
+
 	void HitTest(float x, float y);
 private:
 	void ApplyGridLayout(const int rows, const int columns);

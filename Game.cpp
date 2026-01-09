@@ -4,13 +4,12 @@
 #include <memory>
 #include <random>
 
-constexpr auto TEX_WIDTH = 32;
-constexpr auto TEX_HEIGHT = 32;
+constexpr auto TEX_WIDTH = 32 * 3;
+constexpr auto TEX_HEIGHT = 32 * 3;
 
 Game::Game(SDL_Window* window, SDL_Renderer* renderer, int width, int height)
-    : m_window(window), m_renderer(renderer),
-    m_windowWidth(width), m_windowHeight(height), 
-    m_cardsSelected(CardSelected::NoCard)
+    : m_window(window), m_renderer(renderer), m_windowWidth(width), m_windowHeight(height), 
+        m_cardsSelected(CardSelected::NoCard)
 {
 }
 
@@ -20,15 +19,16 @@ Game::~Game()
 
 int Game::Init()
 {
-    m_assetManager = std::make_unique<AssetManager>(m_renderer);
-    m_assetManager->LoadTexture("Back", "assets/Back.png");
-    m_assetManager->LoadTexture("Skull", "assets/Skull.png");
-    m_assetManager->LoadTexture("Coffin", "assets/Coffin.png");
-    m_assetManager->LoadTexture("Candle", "assets/Candle.png");
-    m_assetManager->LoadTexture("Dagger", "assets/Dagger.png");
+    std::vector<std::string> frontCards = { "Skull", "Coffin", "Candle", "Dagger", "Bat", "Door" };
     
-    std::vector<std::string> frontCards = { "Skull", "Coffin", "Candle", "Dagger"};
-
+    m_assetManager = std::make_unique<AssetManager>(m_renderer);
+    m_assetManager->LoadTexture("Back");
+    
+    for (auto& s : frontCards)
+    {
+        m_assetManager->LoadTexture(s);
+    }
+    
     BuildDeck(frontCards);
 
 	return 0;
@@ -36,7 +36,7 @@ int Game::Init()
 
 int Game::Update()
 {
-    SDL_FRect dst_rect{};
+    //SDL_FRect dst_rect{};
     const Uint64 now = SDL_GetTicks();
 
     // we'll have some textures move around over a few seconds.
@@ -57,8 +57,7 @@ int Game::Update()
     //dst_rect.h = (float)texture_height;
     //SDL_RenderTexture(renderer, texture, NULL, &dst_rect);
  
-    SDL_GetWindowSize(m_window, &m_windowWidth, &m_windowHeight);
-    ApplyGridLayout(2, 4);
+    ApplyGridLayout(3, 4);
     
     if (m_cardsSelected == CardSelected::TwoCards) {
         if (SDL_GetTicks() >= m_resolveCardsAtMs) {
@@ -79,6 +78,18 @@ int Game::Update()
         }
     }
 
+    // Render cards
+    for (size_t i{}; i < m_cards.size(); ++i) 
+    {
+        SDL_Texture* tex = m_assetManager->GetTexture("Back");
+        
+        if (m_cards.at(i).state != CardState::FaceDown) {
+            tex = m_assetManager->GetTexture(m_cards.at(i).frontKey);
+        }
+        
+        SDL_RenderTexture(m_renderer, tex, NULL, &m_cards.at(i).dst);
+    }
+
     // bottom right.
     //dst_rect.x = ((float)(WINDOW_WIDTH - texture_width)) - (100.0f * scale);
     //dst_rect.y = (float)(WINDOW_HEIGHT - texture_height);
@@ -89,6 +100,11 @@ int Game::Update()
     SDL_RenderPresent(m_renderer);  // put it all on the screen!
 
     return 0;
+}
+
+void Game::Resize()
+{
+    SDL_GetWindowSizeInPixels(m_window, &m_windowWidth, &m_windowHeight);
 }
 
 void Game::HitTest(float x, float y)
@@ -133,31 +149,24 @@ void Game::HitTest(float x, float y)
 
 void Game::ApplyGridLayout(int rows, int columns)
 {
-    SDL_Texture* back = m_assetManager->GetTexture("Back");
     float margin = 5.f;
-    float startX = (m_windowWidth / 2.f) - ((TEX_WIDTH * columns) + (margin * (columns - 1)));
-    float startY = (m_windowHeight / 2.f) - ((TEX_HEIGHT * rows) + (margin * (rows - 1)));
-    
+    float gridWidth = columns * TEX_WIDTH + (columns - 1) * margin;
+    float gridHeight = rows * TEX_HEIGHT + (rows - 1) * margin;
+
+    float startX = (m_windowWidth - gridWidth) * 0.5f;
+    float startY = (m_windowHeight - gridHeight) * 0.5f;
+
     for (size_t i{}; i < m_cards.size(); ++i)
     {
         int row = static_cast<int>(i) / columns;
         int col = static_cast<int>(i) % columns;
 
-        SDL_Texture* tex = nullptr;
-        if (m_cards.at(i).state == CardState::FaceDown) {
-            tex = back;
-        } else {
-            tex = m_assetManager->GetTexture(m_cards.at(i).frontKey);
-        }
-    
-        if (tex) {
-            m_cards.at(i).dst = SDL_FRect{
-                startX + col * (TEX_WIDTH + margin),
-                startY + row * (TEX_HEIGHT + margin),
-                TEX_WIDTH, TEX_HEIGHT
-            };
-            SDL_RenderTexture(m_renderer, tex, NULL, &m_cards.at(i).dst);
-        }
+        m_cards.at(i).dst = SDL_FRect{
+            startX + col * (TEX_WIDTH + margin),
+            startY + row * (TEX_HEIGHT + margin),
+            TEX_WIDTH, TEX_HEIGHT
+        };
+        
     }
 }
 
