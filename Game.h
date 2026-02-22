@@ -2,6 +2,7 @@
 
 #include "AssetManager.h"
 #include "Card.h"
+#include "GridLayout.h"
 
 #include <SDL3/SDL.h>
 #include <memory>
@@ -20,16 +21,13 @@ public:
 
 	void HitTest(float x, float y);
 private:
-	void ApplyGridLayout(const int rows, const int columns);
-	void BuildDeck(const std::vector<std::string>& frontKeys);
-private:
 	SDL_Window* m_window;
 	SDL_Renderer* m_renderer;
 	int m_windowWidth;
 	int m_windowHeight;
 
 	std::unique_ptr<AssetManager> m_assetManager;
-	std::vector<Card> m_cards;
+	std::unique_ptr<GridLayout> m_grid;
 
 	// state
 	CardSelected m_cardsSelected;

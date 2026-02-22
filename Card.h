@@ -11,12 +11,5 @@ struct Card
 	int pairId = -1;
 	CardState state = CardState::FaceDown;
 	std::string frontKey;
-	SDL_FRect dst{}; // coords
 	float rotation = 0.f;
-
-	bool contains(float x, float y) const
-	{
-		return (x >= dst.x && x <= dst.x + dst.w &&
-				y >= dst.y && y <= dst.y + dst.h);
-	}
 };
