@@ -1,0 +1,7 @@
+All assets in the /assets folder (images, music, sounds, art, etc.)
+are NOT covered by the repository's open source license.
+
+Copyright (c) 2026 f1sch
+
+You may not copy, redistribute, modify, or use these assets
+in other projects without explicit permission.
