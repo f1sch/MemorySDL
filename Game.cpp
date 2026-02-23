@@ -1,3 +1,5 @@
+#include "pch.h"
+
 #include "AssetManager.h"
 #include "Card.h"
 #include "Game.h"
