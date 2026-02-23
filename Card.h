@@ -1,6 +1,5 @@
 #pragma once
 
-#include <SDL3/SDL.h>
 #include <string>
 
 enum class CardState { FaceDown, FaceUp, Matched };

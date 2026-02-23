@@ -1,5 +1,15 @@
 #include "AssetManager.h"
 
+#include <SDL3/SDL_error.h>
+#include <SDL3/SDL_filesystem.h>
+#include <SDL3/SDL_log.h>
+#include <SDL3/SDL_render.h>
+#include <SDL3/SDL_stdinc.h>
+#include <SDL3/SDL_surface.h>
+
+#include <string>
+#include <unordered_map>
+
 AssetManager::AssetManager(SDL_Renderer* renderer)
 {
     m_renderer = renderer;
@@ -13,7 +23,7 @@ AssetManager::~AssetManager()
     }
 }
 
-int AssetManager::LoadTexture(const std::string& key)
+void AssetManager::LoadTexture(const std::string& key)
 {
     SDL_Surface* surface = NULL;
     char* png_path = NULL;
@@ -30,7 +40,6 @@ int AssetManager::LoadTexture(const std::string& key)
     surface = SDL_LoadPNG(png_path);
     if (!surface) {
         SDL_Log("Couldn't load bitmap: %s", SDL_GetError());
-        return SDL_APP_FAILURE;
     }
 
     SDL_free(png_path);  // done with this, the file is loaded.
@@ -38,15 +47,12 @@ int AssetManager::LoadTexture(const std::string& key)
     SDL_Texture* tex = SDL_CreateTextureFromSurface(m_renderer, surface);
     if (!tex) {
         SDL_Log("Couldn't create static texture: %s", SDL_GetError());
-        return SDL_APP_FAILURE;
     }
     
     SDL_SetTextureScaleMode(tex, SDL_SCALEMODE_NEAREST);
     m_textures.insert({ key, tex });
     
     SDL_DestroySurface(surface);  // done with this, the texture has a copy of the pixels now.
-
-    return m_textures.size()-1;
 }
 
 SDL_Texture* AssetManager::GetTexture(const std::string& key) const

@@ -1,5 +1,6 @@
 #pragma once
-#include <SDL3/SDL.h>
+
+#include <SDL3/SDL_render.h>
 
 #include <unordered_map>
 #include <string>
@@ -10,7 +11,7 @@ public:
 	AssetManager(SDL_Renderer* renderer);
 	~AssetManager();
 
-	int LoadTexture(const std::string& key);
+	void LoadTexture(const std::string& key);
 
 	// Getters
 	SDL_Texture* GetTexture(const std::string& key) const;

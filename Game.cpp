@@ -1,8 +1,17 @@
-#include "Game.h"
 #include "AssetManager.h"
+#include "Card.h"
+#include "Game.h"
 #include "GridLayout.h"
 
+#include <SDL3/SDL_pixels.h>
+#include <SDL3/SDL_rect.h>
+#include <SDL3/SDL_render.h>
+#include <SDL3/SDL_timer.h>
+#include <SDL3/SDL_video.h>
+
 #include <memory>
+#include <string>
+#include <vector>
 
 constexpr auto TEX_WIDTH = 32 * 3;
 constexpr auto TEX_HEIGHT = 32 * 3;
@@ -40,21 +49,14 @@ int Game::Init()
 
 int Game::Update()
 {
-    const Uint64 now = SDL_GetTicks();
+    //const Uint64 now = SDL_GetTicks();
 
     // we'll have some textures move around over a few seconds.
-    const float direction = ((now % 2000) >= 1000) ? 1.0f : -1.0f;
-    const float scale = ((float)(((int)(now % 1000)) - 500) / 500.0f) * direction;
+    //const float direction = ((now % 2000) >= 1000) ? 1.0f : -1.0f;
+    //const float scale = ((float)(((int)(now % 1000)) - 500) / 500.0f) * direction;
 
     SDL_SetRenderDrawColor(m_renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
     SDL_RenderClear(m_renderer);
-
-    // top left
-    //dst_rect.x = (100.0f * scale);
-    //dst_rect.y = 0.0f;
-    //dst_rect.w = (float)texture_width;
-    //dst_rect.h = (float)texture_height;
-    //SDL_RenderTexture(renderer, texture, NULL, &dst_rect);
     
     if (m_cardsSelected == CardSelected::TwoCards) {
         if (SDL_GetTicks() >= m_resolveCardsAtMs) {
@@ -76,22 +78,19 @@ int Game::Update()
     }
 
     // Iterate over GridLayout and render
-    for (size_t i{}; i < m_grid->GetSize(); ++i)
+    const int size = static_cast<int>(m_grid->GetSize());
+    for (int i = 0; i < size; ++i)
     {
         SDL_Texture* tex = m_assetManager->GetTexture("Back");
+        auto& card = m_grid->m_cards.at(i);
+        auto& rect = m_grid->m_grid.at(i);
 
-        if (m_grid->m_cards.at(i).state != CardState::FaceDown) {
-            tex = m_assetManager->GetTexture(m_grid->m_cards.at(i).frontKey);
+        if (card.state != CardState::FaceDown) {
+            tex = m_assetManager->GetTexture(card.frontKey);
         }
 
-        SDL_RenderTexture(m_renderer, tex, NULL, &m_grid->m_grid.at(i));
+        SDL_RenderTexture(m_renderer, tex, NULL, &rect);
     }
-    // bottom right.
-    //dst_rect.x = ((float)(WINDOW_WIDTH - texture_width)) - (100.0f * scale);
-    //dst_rect.y = (float)(WINDOW_HEIGHT - texture_height);
-    //dst_rect.w = (float)texture_width;
-    //dst_rect.h = (float)texture_height;
-    //SDL_RenderTexture(renderer, texture, NULL, &dst_rect);
 
     SDL_RenderPresent(m_renderer);
 
@@ -112,7 +111,8 @@ void Game::HitTest(float x, float y)
 
     SDL_Point p = { static_cast<int>(x), static_cast<int>(y) };
     
-    for (size_t i{}; i < m_grid->GetSize(); ++i)
+    const int size = static_cast<int>(m_grid->GetSize());
+    for (int i = 0; i < size; ++i)
     {
         Card& card = m_grid->m_cards.at(i);
         
@@ -121,11 +121,11 @@ void Game::HitTest(float x, float y)
             continue;
 
         // Check if Grid was hit
-        // find() key (card.uniqueId) und dann hole die id aus map -> rect
-        //auto id = m_grid->m_grid.find(card.uniqueId);
-        SDL_Point p{ x,y };
         auto& gridRect = m_grid->m_grid.at(i);
-        SDL_Rect rc{ gridRect.x, gridRect.y, gridRect.w, gridRect.h};
+        SDL_Rect rc{ 
+            static_cast<int>(gridRect.x), static_cast<int>(gridRect.y), 
+            static_cast<int>(gridRect.w), static_cast<int>(gridRect.h)
+        };
         if (!SDL_PointInRect(&p, &rc))
             continue;
 

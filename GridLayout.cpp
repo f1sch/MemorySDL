@@ -1,12 +1,16 @@
-#include "GridLayout.h"
 #include "Card.h"
+#include "GridLayout.h"
 
+#include <SDL3/SDL_rect.h>
+
+#include <algorithm>
 #include <random>
+#include <string>
+#include <vector>
 
 GridLayout::GridLayout(const int rows, const int columns)
     : m_rows(rows), m_columns(columns)
 {
-    //m_grid.resize(static_cast<size_t>(rows * columns));
 }
 
 GridLayout::~GridLayout()
@@ -22,9 +26,9 @@ void GridLayout::InitGrid(const int width, const int height, const int texWidth,
     float startX = (width - gridWidth) * 0.5f;
     float startY = (height - gridHeight) * 0.5f;
 
-    //for (size_t i{}; i < m_grid.size(); ++i)
     m_grid.clear();
-    for (size_t i{}; i < static_cast<size_t>(m_rows * m_columns); ++i)
+    const int size = static_cast<size_t>(m_rows * m_columns);
+    for (int i = 0; i < size; ++i)
     {
         int row = static_cast<int>(i) / m_columns;
         int col = static_cast<int>(i) % m_columns;
@@ -36,12 +40,6 @@ void GridLayout::InitGrid(const int width, const int height, const int texWidth,
             (float)texWidth, (float)texHeight
             } }
         );
-
-        //m_grid.at(i) = SDL_FRect{
-        //    startX + col * (texWidth + margin),
-        //    startY + row * (texHeight + margin),
-        //    (float)texWidth, (float)texHeight
-        //};
     }
 }
 

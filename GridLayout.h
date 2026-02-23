@@ -1,9 +1,11 @@
 #pragma once
 #include "Card.h"
 
-#include <SDL3/SDL.h>
-#include <vector>
+#include <SDL3/SDL_rect.h>
+
 #include <map>
+#include <string>
+#include <vector>
 
 class GridLayout
 {
