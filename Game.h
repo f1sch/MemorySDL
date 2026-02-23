@@ -37,5 +37,10 @@ private:
 	int m_secondCardIdx = -1;
 	Uint64 m_resolveCardsAtMs = 0;
 	static constexpr Uint64 m_revealDelayMs = 800;
+
+	// TEMP
+	SDL_AudioStream* audio;
+	Uint8* wav_data;
+	Uint32 wav_data_len;
 };
 

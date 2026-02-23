@@ -33,8 +33,6 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
 {
     SDL_SetAppMetadata("Spooky Memory", "0.1", "com.example.spookymemory");
 
-    SDL_AudioSpec spec;
-    char* wav_path = NULL;
 
     if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO)) {
         SDL_Log("Couldn't initialize SDL: %s", SDL_GetError());
@@ -47,6 +45,10 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     }
     //SDL_SetRenderLogicalPresentation(renderer, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_LOGICAL_PRESENTATION_INTEGER_SCALE);
     
+    SDL_AudioSpec spec;
+    char* wav_path = NULL;
+    
+    // Load background music
     SDL_asprintf(&wav_path, "%sassets/spooky.wav", SDL_GetBasePath());
     if (!SDL_LoadWAV(wav_path, &spec, &wav_data, &wav_data_len)) {
         SDL_Log("Couldn't load .wav file: %s", SDL_GetError());

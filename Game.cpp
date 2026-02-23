@@ -5,9 +5,15 @@
 #include "Game.h"
 #include "GridLayout.h"
 
+#include <SDL3/SDL_audio.h>
+#include <SDL3/SDL_error.h>
+#include <SDL3/SDL_filesystem.h>
+#include <SDL3/SDL_init.h>
+#include <SDL3/SDL_log.h>
 #include <SDL3/SDL_pixels.h>
 #include <SDL3/SDL_rect.h>
 #include <SDL3/SDL_render.h>
+#include <SDL3/SDL_stdinc.h>
 #include <SDL3/SDL_timer.h>
 #include <SDL3/SDL_video.h>
 
@@ -45,6 +51,28 @@ int Game::Init()
     m_grid = std::make_unique<GridLayout>(3, 4);
     m_grid->BuildDeck(frontCards);
     m_grid->InitGrid(m_windowWidth, m_windowHeight, TEX_WIDTH, TEX_HEIGHT);
+
+    audio = NULL;
+    SDL_AudioSpec spec;
+    char* wav_path = NULL;
+    wav_data = NULL;
+    wav_data_len = 0;
+
+    // Load background music
+    SDL_asprintf(&wav_path, "%sassets/cardFlip.wav", SDL_GetBasePath());
+    if (!SDL_LoadWAV(wav_path, &spec, &wav_data, &wav_data_len)) {
+        SDL_Log("Couldn't load .wav file: %s", SDL_GetError());
+        return SDL_APP_FAILURE;
+    }
+    SDL_free(wav_path);
+
+    audio = SDL_OpenAudioDeviceStream(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, &spec, NULL, NULL);
+    if (!audio) {
+        SDL_Log("Couldn't create audio stream: %s", SDL_GetError());
+        return SDL_APP_FAILURE;
+    }
+
+    SDL_ResumeAudioStreamDevice(audio);
 
 	return 0;
 }
@@ -135,6 +163,8 @@ void Game::HitTest(float x, float y)
         if (m_cardsSelected == CardSelected::OneCard && m_firstCardIdx == i)
             return;
 
+        SDL_ClearAudioStream(audio);
+        SDL_PutAudioStreamData(audio, wav_data, wav_data_len);
         card.state = CardState::FaceUp;
         
         // Current Card is the first Card that was clicked
