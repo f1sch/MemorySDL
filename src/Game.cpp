@@ -4,6 +4,7 @@
 #include "Card.h"
 #include "Game.h"
 #include "GridLayout.h"
+#include "SoundSystem.h"
 
 #include <SDL3/SDL_audio.h>
 #include <SDL3/SDL_error.h>
@@ -52,27 +53,30 @@ int Game::Init()
     m_grid->BuildDeck(frontCards);
     m_grid->InitGrid(m_windowWidth, m_windowHeight, TEX_WIDTH, TEX_HEIGHT);
 
-    audio = NULL;
-    SDL_AudioSpec spec;
-    char* wav_path = NULL;
-    wav_data = NULL;
-    wav_data_len = 0;
+    m_soundSystem = std::make_unique<SoundSystem>();
+    m_soundSystem->Init();
 
-    // Load background music
-    SDL_asprintf(&wav_path, "%sassets/cardFlip.wav", SDL_GetBasePath());
-    if (!SDL_LoadWAV(wav_path, &spec, &wav_data, &wav_data_len)) {
-        SDL_Log("Couldn't load .wav file: %s", SDL_GetError());
-        return SDL_APP_FAILURE;
-    }
-    SDL_free(wav_path);
-
-    audio = SDL_OpenAudioDeviceStream(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, &spec, NULL, NULL);
-    if (!audio) {
-        SDL_Log("Couldn't create audio stream: %s", SDL_GetError());
-        return SDL_APP_FAILURE;
-    }
-
-    SDL_ResumeAudioStreamDevice(audio);
+    //audio = NULL;
+    //SDL_AudioSpec spec;
+    //char* wav_path = NULL;
+    //wav_data = NULL;
+    //wav_data_len = 0;
+    //
+    //// Load background music
+    //SDL_asprintf(&wav_path, "%sassets/cardFlip.wav", SDL_GetBasePath());
+    //if (!SDL_LoadWAV(wav_path, &spec, &wav_data, &wav_data_len)) {
+    //    SDL_Log("Couldn't load .wav file: %s", SDL_GetError());
+    //    return SDL_APP_FAILURE;
+    //}
+    //SDL_free(wav_path);
+    //
+    //audio = SDL_OpenAudioDeviceStream(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, &spec, NULL, NULL);
+    //if (!audio) {
+    //    SDL_Log("Couldn't create audio stream: %s", SDL_GetError());
+    //    return SDL_APP_FAILURE;
+    //}
+    //
+    //SDL_ResumeAudioStreamDevice(audio);
 
 	return 0;
 }
@@ -124,6 +128,8 @@ int Game::Update()
 
     SDL_RenderPresent(m_renderer);
 
+    m_soundSystem->LoopSound(SoundSystem::SoundId::Background);
+
     return 0;
 }
 
@@ -163,8 +169,8 @@ void Game::HitTest(float x, float y)
         if (m_cardsSelected == CardSelected::OneCard && m_firstCardIdx == i)
             return;
 
-        SDL_ClearAudioStream(audio);
-        SDL_PutAudioStreamData(audio, wav_data, wav_data_len);
+        m_soundSystem->PlaySound(SoundSystem::SoundId::CardFlip);
+
         card.state = CardState::FaceUp;
         
         // Current Card is the first Card that was clicked
