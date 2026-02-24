@@ -1,6 +1,8 @@
 #pragma once
 
 #include <SDL3/SDL_audio.h>
+#include <SDL3/SDL_stdinc.h>
+
 #include <unordered_map>
 
 class SoundSystem
@@ -17,10 +19,12 @@ public:
 private:
     struct SoundData
     {
-        Uint8* wav_data;
-        Uint32 wav_data_len;
+        Uint8* wavData;
+        Uint32 wavDataLen;
     };
 	SDL_AudioStream* m_audio;
     SDL_AudioSpec m_spec;
+    SDL_AudioSpec m_deviceSpec{};
+    SDL_AudioSpec m_wavSpec{};
     std::unordered_map<SoundId, SoundData> m_sounds;
 };
