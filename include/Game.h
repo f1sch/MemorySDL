@@ -2,6 +2,7 @@
 
 #include "AssetManager.h"
 #include "GridLayout.h"
+#include "SoundSystem.h"
 
 #include <SDL3/SDL_render.h>
 #include <SDL3/SDL_stdinc.h>
@@ -18,6 +19,7 @@ public:
 
 	int Init();
 	int Update();
+	void ShutdownGame();
 
 	void Resize();
 
@@ -30,6 +32,7 @@ private:
 
 	std::unique_ptr<AssetManager> m_assetManager;
 	std::unique_ptr<GridLayout> m_grid;
+	std::unique_ptr<SoundSystem> m_soundSystem;
 
 	// state
 	CardSelected m_cardsSelected;
@@ -37,10 +40,5 @@ private:
 	int m_secondCardIdx = -1;
 	Uint64 m_resolveCardsAtMs = 0;
 	static constexpr Uint64 m_revealDelayMs = 800;
-
-	// TEMP
-	SDL_AudioStream* audio;
-	Uint8* wav_data;
-	Uint32 wav_data_len;
 };
 
