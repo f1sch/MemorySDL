@@ -1,4 +1,5 @@
 #pragma once
+
 #include "Card.h"
 
 #include <SDL3/SDL_rect.h>
@@ -7,12 +8,9 @@
 #include <string>
 #include <vector>
 
+
 class GridLayout
 {
-	struct Element {
-		int cardId = -1;
-		SDL_FRect rect;
-	}; // TODO: delete me?
 public:
 	GridLayout(const int rows, const int columns);
 	~GridLayout();
