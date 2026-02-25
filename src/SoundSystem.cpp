@@ -18,14 +18,6 @@ SoundSystem::SoundSystem()
 
 SoundSystem::~SoundSystem()
 {
-    for (auto& [id, sound] : m_sounds)
-    {
-        SDL_free(sound.wavData);
-    }
-    if (m_musicStream)
-        SDL_DestroyAudioStream(m_musicStream); // TODO: error on app exit
-    if (m_device)
-        SDL_CloseAudioDevice(m_device);
 }
 
 void SoundSystem::Init()
@@ -62,6 +54,31 @@ void SoundSystem::Init()
 
     LoadSound(SoundId::Background, "assets/spooky.wav");
     LoadSound(SoundId::CardFlip, "assets/cardFlip.wav");
+}
+
+void SoundSystem::ShutdownSound()
+{
+    if (m_device)
+    {
+        SDL_PauseAudioDevice(m_device);
+        if (m_musicStream)
+            SDL_UnbindAudioStream(m_musicStream);
+        if (m_sfxStream)
+            SDL_UnbindAudioStream(m_sfxStream);
+    
+    }
+    if (m_musicStream)
+        SDL_DestroyAudioStream(m_musicStream);
+    if (m_sfxStream)
+        SDL_DestroyAudioStream(m_sfxStream);
+    
+    if (m_device)
+        SDL_CloseAudioDevice(m_device);
+    
+    for (auto& [id, sound] : m_sounds)
+    {
+        SDL_free(sound.wavData);
+    }
 }
 
 void SoundSystem::PlaySfxSound(SoundId id)

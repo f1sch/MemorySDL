@@ -105,6 +105,11 @@ int Game::Update()
     return 0;
 }
 
+void Game::ShutdownGame()
+{
+    m_soundSystem->ShutdownSound();
+}
+
 void Game::Resize()
 {
     SDL_GetWindowSizeInPixels(m_window, &m_windowWidth, &m_windowHeight);

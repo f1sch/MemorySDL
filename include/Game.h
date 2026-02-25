@@ -19,6 +19,7 @@ public:
 
 	int Init();
 	int Update();
+	void ShutdownGame();
 
 	void Resize();
 

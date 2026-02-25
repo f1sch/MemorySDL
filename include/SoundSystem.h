@@ -13,6 +13,7 @@ public:
     SoundSystem();
     ~SoundSystem();
     void Init();
+    void ShutdownSound();
     void PlaySfxSound(SoundId id);
     void LoadSound(SoundId id, const char* path);
     
