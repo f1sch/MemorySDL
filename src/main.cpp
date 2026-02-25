@@ -1,10 +1,13 @@
 #define SDL_MAIN_USE_CALLBACKS 1  /* use the callbacks instead of main() */
+#define NOMINMAX
+#define _CRT_SECURE_NO_WARNINGS
 
-#include "pch.h"
+//#include "pch.h"
 #include "Game.h"
 
 #include <SDL3/SDL_error.h>
 #include <SDL3/SDL_events.h>
+#include <SDL3/SDL_main.h>
 #include <SDL3/SDL_init.h>
 #include <SDL3/SDL_log.h>
 #include <SDL3/SDL_render.h>
@@ -37,7 +40,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
         return SDL_APP_FAILURE;
     }
     //SDL_SetRenderLogicalPresentation(renderer, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_LOGICAL_PRESENTATION_INTEGER_SCALE);
-
+    
     game = std::make_unique<Game>(window, renderer, WINDOW_WIDTH, WINDOW_HEIGHT);
     game->Init();
     
