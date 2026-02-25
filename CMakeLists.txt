@@ -7,46 +7,53 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_subdirectory(external/SDL)
 
-set(SDLIMAGE_AVIF OFF CACHE BOOL "" FORCE)
+set(SDLIMAGE_AVIF OFF CACHE BOOL "Disable AVIF support" FORCE)
+#option(SDLIMAGE_AVIF "Enable AVIF support" OFF)
 add_subdirectory(external/SDL_image)
 
-add_executable(MemorySDL WIN32)
+add_executable(MemorySDL)
 
-target_sources(MemorySDL PRIVATE
-	src/main.cpp
-	src/Game.cpp
-	src/AssetManager.cpp
-	src/GridLayout.cpp
-	src/SoundSystem.cpp
+file(GLOB_RECURSE GAME_SOURCES
+    CONFIGURE_DEPENDS
+    ${CMAKE_SOURCE_DIR}/src/*.cpp
 )
 
-#target_precompile_headers(SpookyMemory PRIVATE include/pch.h)
+target_sources(MemorySDL PRIVATE 
+    ${GAME_SOURCES}
+)
 
-#target_include_directories(MemorySDL PRIVATE include)
+if (WIN32)
+    set_target_properties(MemorySDL PROPERTIES WIN32_EXECUTABLE TRUE)
+endif()
+
+#target_include_directories(MemorySDL PRIVATE 
+#    ${CMAKE_SOURCE_DIR}/include
+#)
+
+#target_precompile_headers(SpookyMemory PRIVATE include/pch.h)
 
 target_link_libraries(MemorySDL PRIVATE 
 	SDL3::SDL3
 	SDL3_image::SDL3_image
 )
 
+# Copy assets after build
 add_custom_command(TARGET MemorySDL POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        $<TARGET_FILE:SDL3::SDL3>
-        $<TARGET_FILE_DIR:MemorySDL>
-)
-
-add_custom_command(TARGET MemorySDL POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        $<TARGET_FILE:SDL3_image::SDL3_image>
-        $<TARGET_FILE_DIR:MemorySDL>
-)
-
-file(GLOB_RECURSE GAME_ASSETS "${CMAKE_SOURCE_DIR}/assets/*")
-
-add_custom_target(copy_assets ALL
     COMMAND ${CMAKE_COMMAND} -E copy_directory
-        ${CMAKE_SOURCE_DIR}/assets
-        $<TARGET_FILE_DIR:MemorySDL>/assets
+    ${CMAKE_SOURCE_DIR}/assets
+    $<TARGET_FILE_DIR:MemorySDL>/assets
 )
 
-add_dependencies(MemorySDL copy_assets)
+if (WIN32)
+    add_custom_command(TARGET MemorySDL POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            $<TARGET_FILE:SDL3::SDL3>
+            $<TARGET_FILE_DIR:MemorySDL>
+    )
+
+    add_custom_command(TARGET MemorySDL POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            $<TARGET_FILE:SDL3_image::SDL3_image>
+            $<TARGET_FILE_DIR:MemorySDL>
+    )
+endif()
