@@ -13,18 +13,23 @@ public:
     SoundSystem();
     ~SoundSystem();
     void Init();
-    void PlaySound(SoundId id);
+    void PlaySfxSound(SoundId id);
     void LoadSound(SoundId id, const char* path);
-    void LoopSound(SoundId id);
+    
+    void LoopSfxSound(SoundId id);
+    void LoopMusic(SoundId id);
+
 private:
     struct SoundData
     {
         Uint8* wavData;
         Uint32 wavDataLen;
     };
-	SDL_AudioStream* m_audio;
-    SDL_AudioSpec m_spec;
-    SDL_AudioSpec m_deviceSpec{};
-    SDL_AudioSpec m_wavSpec{};
+	
+    SDL_AudioDeviceID m_device;
+    SDL_AudioStream* m_musicStream;
+    SDL_AudioStream* m_sfxStream;
+    SDL_AudioSpec m_deviceSpec;
+    
     std::unordered_map<SoundId, SoundData> m_sounds;
 };

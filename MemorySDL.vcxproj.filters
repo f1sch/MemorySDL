@@ -47,6 +47,9 @@
     <Media Include="assets\spooky.wav">
       <Filter>Resource Files\audio</Filter>
     </Media>
+    <Media Include="assets\cardFlip.wav">
+      <Filter>Resource Files\audio</Filter>
+    </Media>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\pch.cpp">

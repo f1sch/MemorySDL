@@ -181,6 +181,7 @@ exit /b 0
     </Image>
   </ItemGroup>
   <ItemGroup>
+    <Media Include="assets\cardFlip.wav" />
     <Media Include="assets\spooky.wav" />
   </ItemGroup>
   <ItemGroup>

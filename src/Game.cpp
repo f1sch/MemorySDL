@@ -100,7 +100,7 @@ int Game::Update()
 
     SDL_RenderPresent(m_renderer);
 
-    m_soundSystem->LoopSound(SoundSystem::SoundId::Background);
+    m_soundSystem->LoopMusic(SoundSystem::SoundId::Background);
 
     return 0;
 }
@@ -141,8 +141,7 @@ void Game::HitTest(float x, float y)
         if (m_cardsSelected == CardSelected::OneCard && m_firstCardIdx == i)
             return;
 
-        // TODO: background music gets cut and cardFLip.wav is not played
-        m_soundSystem->PlaySound(SoundSystem::SoundId::CardFlip);
+        m_soundSystem->PlaySfxSound(SoundSystem::SoundId::CardFlip);
 
         card.state = CardState::FaceUp;
         

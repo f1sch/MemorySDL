@@ -10,7 +10,9 @@
 #include <string>
 
 SoundSystem::SoundSystem()
-    : m_audio(nullptr), m_spec{}
+    : m_device{}, 
+    m_musicStream(nullptr), m_sfxStream(nullptr), 
+    m_deviceSpec{}
 {
 }
 
@@ -20,36 +22,58 @@ SoundSystem::~SoundSystem()
     {
         SDL_free(sound.wavData);
     }
-    if (m_audio)
-        SDL_DestroyAudioStream(m_audio); // TODO: error on app exit
+    if (m_musicStream)
+        SDL_DestroyAudioStream(m_musicStream); // TODO: error on app exit
+    if (m_device)
+        SDL_CloseAudioDevice(m_device);
 }
 
 void SoundSystem::Init()
 {
-    //SDL_AudioSpec deviceSpec{};
     m_deviceSpec.format = SDL_AUDIO_F32;
     m_deviceSpec.channels = 2;
     m_deviceSpec.freq = 44100;
-
-    m_audio = SDL_CreateAudioStream(&m_wavSpec, &m_deviceSpec);
-    m_audio = SDL_OpenAudioDeviceStream(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, &m_deviceSpec, NULL, NULL);
-    if (!m_audio) {
-        SDL_Log("Couldn't create audio stream: %s", SDL_GetError());
+    
+    m_device = SDL_OpenAudioDevice(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, &m_deviceSpec);
+    if (!m_device) 
+    {
+        SDL_Log("Couldn't open audio device: %s", SDL_GetError());
+        return;
+    }
+    
+    m_musicStream = SDL_CreateAudioStream(&m_deviceSpec, &m_deviceSpec);
+    if (!m_musicStream) 
+    {
+        SDL_Log("Couldn't create music stream: %s", SDL_GetError());
+        return;
+    }
+    
+    m_sfxStream = SDL_CreateAudioStream(&m_deviceSpec, &m_deviceSpec);
+    if (!m_sfxStream) 
+    {
+        SDL_Log("Couldn't create sfx stream: %s", SDL_GetError());
         return;
     }
 
-    SDL_ResumeAudioStreamDevice(m_audio);
+    SDL_BindAudioStream(m_device, m_musicStream);
+    SDL_BindAudioStream(m_device, m_sfxStream);
+
+    SDL_ResumeAudioDevice(m_device);
 
     LoadSound(SoundId::Background, "assets/spooky.wav");
     LoadSound(SoundId::CardFlip, "assets/cardFlip.wav");
 }
 
-void SoundSystem::PlaySound(SoundId id)
+void SoundSystem::PlaySfxSound(SoundId id)
 {
-    auto& sound = m_sounds[id];
+    auto it = m_sounds.find(id);
+    if (it == m_sounds.end()) 
+        return;
 
-    SDL_ClearAudioStream(m_audio);
-    SDL_PutAudioStreamData(m_audio, sound.wavData, sound.wavDataLen);
+    // TODO: what should happen if a second card is flipped before the sound of
+    // the first card ended?
+    SDL_ClearAudioStream(m_sfxStream); 
+    SDL_PutAudioStreamData(m_sfxStream, it->second.wavData, it->second.wavDataLen);
 }
 
 void SoundSystem::LoadSound(SoundId id, const char* path)
@@ -57,24 +81,52 @@ void SoundSystem::LoadSound(SoundId id, const char* path)
     const char* basePath = SDL_GetBasePath();
     std::string fullPath = std::string(basePath) + path;
     
-    //SDL_AudioSpec wavSpec{};
+    SDL_AudioSpec wavSpec{};
     Uint8* wavData = nullptr;
     Uint32 wavDataLen = 0;
 
-    if (!SDL_LoadWAV(fullPath.c_str(), &m_wavSpec, &wavData, &wavDataLen)) {
+    if (!SDL_LoadWAV(fullPath.c_str(), &wavSpec, &wavData, &wavDataLen)) 
+    {
         SDL_Log("Couldn't load .wav file: %s", SDL_GetError());
         return;
     }
 
-    SDL_Log("WAV: %d Hz %d channels", m_wavSpec.freq, m_wavSpec.channels);
+    SDL_Log("WAV: %d Hz %d channels", wavSpec.freq, wavSpec.channels);
     
-    m_sounds[id] = { wavData, wavDataLen };
+    SDL_AudioStream* convertStream = SDL_CreateAudioStream(&wavSpec, &m_deviceSpec);
+    if (!convertStream) 
+    {
+        SDL_Log("Couldn't create conversion stream: %s", SDL_GetError());
+        SDL_free(wavData);
+        return;
+    }
+
+    SDL_PutAudioStreamData(convertStream, wavData, wavDataLen);
+    SDL_FlushAudioStream(convertStream);
+
+    int convertedSize = SDL_GetAudioStreamAvailable(convertStream);
+    Uint8* convertedData = (Uint8*)SDL_malloc(convertedSize);
+
+    SDL_GetAudioStreamData(convertStream, convertedData, convertedSize);
+
+    SDL_DestroyAudioStream(convertStream);
+    SDL_free(wavData);
+
+    m_sounds[id] = { convertedData, (Uint32)convertedSize};
 }
 
-void SoundSystem::LoopSound(SoundId id)
+void SoundSystem::LoopSfxSound(SoundId id)
 {
-    auto& sound = m_sounds[id];
-    if (SDL_GetAudioStreamQueued(m_audio) < (int)sound.wavDataLen) {
-        SDL_PutAudioStreamData(m_audio, sound.wavData, sound.wavDataLen);
+    if (SDL_GetAudioStreamAvailable(m_sfxStream) < 4096) 
+    {
+        PlaySfxSound(id);
+    }
+}
+
+void SoundSystem::LoopMusic(SoundId id)
+{
+    if (SDL_GetAudioStreamAvailable(m_musicStream) < 4096)
+    {
+        SDL_PutAudioStreamData(m_musicStream, m_sounds[id].wavData, m_sounds[id].wavDataLen);
     }
 }
