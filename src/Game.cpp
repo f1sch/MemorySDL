@@ -40,14 +40,9 @@ int Game::Init()
     
     m_assetManager = std::make_unique<AssetManager>(m_renderer);
     m_assetManager->LoadTexture("Back");
-    // Deactivated for testing
-    //for (auto& s : frontCards)
-    //{
-    //    m_assetManager->LoadTexture(s);
-    //}
     
     // TESTING:
-    int numOfCards = 2;
+    int numOfCards = 6; // set to number of cards that will be rendered
     std::vector<std::string> testingCards{};
     for (int i{}; i < numOfCards; ++i)
     {
@@ -60,9 +55,6 @@ int Game::Init()
     
     m_grid = std::make_unique<GridLayout>(numOfCards/2, 4);
     
-    // Deactivated for testing
-    //m_grid = std::make_unique<GridLayout>(3, 4);
-    //m_grid->BuildDeck(frontCards);
     m_grid->BuildDeck(testingCards);
     m_grid->InitGrid(m_windowWidth, m_windowHeight, TEX_WIDTH, TEX_HEIGHT);
 
