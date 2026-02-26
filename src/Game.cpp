@@ -87,32 +87,51 @@ int Game::Init()
 
 int Game::Update()
 {
-    // TODO: Don't allow Game::Update() to be called, if GameState is ::Ended ?
-    if (m_gameState == GameState::Ended)
-        return 0;
-
     //const Uint64 now = SDL_GetTicks();
     // we'll have some textures move around over a few seconds.
     //const float direction = ((now % 2000) >= 1000) ? 1.0f : -1.0f;
     //const float scale = ((float)(((int)(now % 1000)) - 500) / 500.0f) * direction;
+    
+    int result = 0;
+    switch (m_gameState)
+    {
+    case Game::GameState::Running:
+        UpdateGameplay();
+        break;
+    case Game::GameState::Ended:
+        UpdateEndScreen();
+        result = -1;
+        break;
+    case Game::GameState::Paused:
+        break;
+    default:
+        break;
+    }
 
+    m_soundSystem->LoopMusic(SoundSystem::SoundId::Background);
+
+    return result;
+}
+
+void Game::UpdateGameplay()
+{
     SDL_SetRenderDrawColor(m_renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
     SDL_RenderClear(m_renderer);
-    
-    if (m_cardsSelected == CardSelected::TwoCards) 
+
+    if (m_cardsSelected == CardSelected::TwoCards)
     {
-        if (SDL_GetTicks() >= m_resolveCardsAtMs) 
+        if (SDL_GetTicks() >= m_resolveCardsAtMs)
         {
             Card& a = m_grid->m_cards.at(m_firstCardIdx);
             Card& b = m_grid->m_cards.at(m_secondCardIdx);
 
-            if (a.pairId == b.pairId) 
+            if (a.pairId == b.pairId)
             {
                 a.state = CardState::Matched;
                 b.state = CardState::Matched;
                 m_numOfCardsMatched += 2;
-            } 
-            else 
+            }
+            else
             {
                 a.state = CardState::FaceDown;
                 b.state = CardState::FaceDown;
@@ -121,34 +140,11 @@ int Game::Update()
             m_firstCardIdx = -1;
             m_secondCardIdx = -1;
             m_cardsSelected = CardSelected::NoCard;
-            
-            // TODO: Change scene
+
             if (m_numOfCardsMatched == m_grid->GetSize())
             {
                 m_gameState = GameState::Ended;
-                
-                // Draw End screen
-                SDL_SetRenderDrawColor(m_renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
-                SDL_RenderClear(m_renderer);
-                SDL_SetRenderDrawColor(m_renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
-                
-                // Ending title
-                SDL_SetRenderScale(m_renderer, 5.f, 5.f);
-                const char* text = "GAME ENDED!";
-                float middle = ((m_windowWidth / static_cast<float>(2)) / 5.f) - (SDL_strlen(text) * 5.f)/1.25f;
-                SDL_RenderDebugText(m_renderer, middle, middle, text);
-                SDL_SetRenderScale(m_renderer, 1.0f, 1.0f);
-                
-                // PlayButton
-                SDL_Texture* play = m_assetManager->GetTexture("PlayButton");
-                SDL_RenderTexture(m_renderer, play, NULL, &m_playButtonRect);
-
-                // QuitButton
-                SDL_Texture* quit = m_assetManager->GetTexture("QuitButton");
-                SDL_RenderTexture(m_renderer, quit, NULL, &m_quitButtonRect);
-
-                SDL_RenderPresent(m_renderer);
-                return 0;
+                return;
             }
         }
     }
@@ -161,7 +157,7 @@ int Game::Update()
         auto& card = m_grid->m_cards.at(i);
         auto& rect = m_grid->m_grid.at(i);
 
-        if (card.state != CardState::FaceDown) 
+        if (card.state != CardState::FaceDown)
         {
             tex = m_assetManager->GetTexture(card.frontKey);
         }
@@ -170,10 +166,31 @@ int Game::Update()
     }
 
     SDL_RenderPresent(m_renderer);
+}
 
-    m_soundSystem->LoopMusic(SoundSystem::SoundId::Background);
+void Game::UpdateEndScreen()
+{
+    // Draw End screen
+    SDL_SetRenderDrawColor(m_renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
+    SDL_RenderClear(m_renderer);
+    SDL_SetRenderDrawColor(m_renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
 
-    return 0;
+    // Ending title
+    SDL_SetRenderScale(m_renderer, 5.f, 5.f);
+    const char* text = "GAME ENDED!";
+    float middle = ((m_windowWidth / static_cast<float>(2)) / 5.f) - (SDL_strlen(text) * 5.f) / 1.25f;
+    SDL_RenderDebugText(m_renderer, middle, middle, text);
+    SDL_SetRenderScale(m_renderer, 1.0f, 1.0f);
+
+    // PlayButton
+    SDL_Texture* play = m_assetManager->GetTexture("PlayButton");
+    SDL_RenderTexture(m_renderer, play, NULL, &m_playButtonRect);
+
+    // QuitButton
+    SDL_Texture* quit = m_assetManager->GetTexture("QuitButton");
+    SDL_RenderTexture(m_renderer, quit, NULL, &m_quitButtonRect);
+
+    SDL_RenderPresent(m_renderer);
 }
 
 void Game::ShutdownGame()

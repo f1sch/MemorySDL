@@ -19,8 +19,11 @@ public:
 	~Game();
 
 	int Init();
-	int Update();
 	void ShutdownGame();
+	
+	int Update();
+	void UpdateGameplay();
+	void UpdateEndScreen();
 
 	void Resize();
 
