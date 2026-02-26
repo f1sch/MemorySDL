@@ -19,6 +19,9 @@
     <Filter Include="Resource Files\audio">
       <UniqueIdentifier>{e85d6076-2c7d-448d-92be-c78ce4077f93}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files\Buttons">
+      <UniqueIdentifier>{1e534410-3102-44f5-8f82-e3705c750ba6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Image Include="assets\Skull.png">
@@ -41,6 +44,12 @@
     </Image>
     <Image Include="assets\Door.png">
       <Filter>Resource Files\cards</Filter>
+    </Image>
+    <Image Include="assets\PlayButton.png">
+      <Filter>Resource Files\Buttons</Filter>
+    </Image>
+    <Image Include="assets\QuitButton.png">
+      <Filter>Resource Files\Buttons</Filter>
     </Image>
   </ItemGroup>
   <ItemGroup>

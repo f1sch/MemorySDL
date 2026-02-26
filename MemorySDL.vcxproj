@@ -173,6 +173,8 @@ exit /b 0
     <Image Include="assets\Coffin.png" />
     <Image Include="assets\Dagger.png" />
     <Image Include="assets\Door.png" />
+    <Image Include="assets\PlayButton.png" />
+    <Image Include="assets\QuitButton.png" />
     <Image Include="assets\Skull.png">
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</DeploymentContent>
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</DeploymentContent>
