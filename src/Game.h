@@ -24,7 +24,7 @@ public:
 
 	void Resize();
 
-	void HitTest(float x, float y);
+	int HitTest(float x, float y);
 private:
 	// Window
 	SDL_Window* m_window;
