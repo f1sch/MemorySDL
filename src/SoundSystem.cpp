@@ -17,8 +17,7 @@ SoundSystem::SoundSystem()
 }
 
 SoundSystem::~SoundSystem()
-{
-}
+= default;
 
 void SoundSystem::Init()
 {
@@ -75,28 +74,28 @@ void SoundSystem::ShutdownSound()
     if (m_device)
         SDL_CloseAudioDevice(m_device);
     
-    for (auto& [id, sound] : m_sounds)
+    for (const auto& [id, sound] : m_sounds)
     {
         SDL_free(sound.wavData);
     }
 }
 
-void SoundSystem::PlaySfxSound(SoundId id)
+void SoundSystem::PlaySfxSound(const SoundId id)
 {
-    auto it = m_sounds.find(id);
+    const auto it = m_sounds.find(id);
     if (it == m_sounds.end()) 
         return;
 
     // TODO: what should happen if a second card is flipped before the sound of
     // the first card ended?
     SDL_ClearAudioStream(m_sfxStream); 
-    SDL_PutAudioStreamData(m_sfxStream, it->second.wavData, it->second.wavDataLen);
+    SDL_PutAudioStreamData(m_sfxStream, it->second.wavData, static_cast<int>(it->second.wavDataLen));
 }
 
-void SoundSystem::LoadSound(SoundId id, const char* path)
+void SoundSystem::LoadSound(const SoundId id, const char* path)
 {
     const char* basePath = SDL_GetBasePath();
-    std::string fullPath = std::string(basePath) + path;
+    const std::string fullPath = std::string(basePath) + path;
     
     SDL_AudioSpec wavSpec{};
     Uint8* wavData = nullptr;
@@ -118,18 +117,18 @@ void SoundSystem::LoadSound(SoundId id, const char* path)
         return;
     }
 
-    SDL_PutAudioStreamData(convertStream, wavData, wavDataLen);
+    SDL_PutAudioStreamData(convertStream, wavData, static_cast<int>(wavDataLen));
     SDL_FlushAudioStream(convertStream);
 
-    int convertedSize = SDL_GetAudioStreamAvailable(convertStream);
-    Uint8* convertedData = (Uint8*)SDL_malloc(convertedSize);
+    const int convertedSize = SDL_GetAudioStreamAvailable(convertStream);
+    const auto convertedData = static_cast<Uint8*>(SDL_malloc(convertedSize));
 
     SDL_GetAudioStreamData(convertStream, convertedData, convertedSize);
 
     SDL_DestroyAudioStream(convertStream);
     SDL_free(wavData);
 
-    m_sounds[id] = { convertedData, (Uint32)convertedSize};
+    m_sounds[id] = { convertedData, static_cast<Uint32>(convertedSize)};
 }
 
 void SoundSystem::LoopSfxSound(SoundId id)
@@ -140,10 +139,10 @@ void SoundSystem::LoopSfxSound(SoundId id)
     }
 }
 
-void SoundSystem::LoopMusic(SoundId id)
+void SoundSystem::LoopMusic(const SoundId id)
 {
     if (SDL_GetAudioStreamAvailable(m_musicStream) < 4096)
     {
-        SDL_PutAudioStreamData(m_musicStream, m_sounds[id].wavData, m_sounds[id].wavDataLen);
+        SDL_PutAudioStreamData(m_musicStream, m_sounds[id].wavData, static_cast<int>(m_sounds[id].wavDataLen));
     }
 }

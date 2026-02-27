@@ -12,11 +12,11 @@
 class GridLayout
 {
 public:
-	GridLayout(const int rows, const int columns);
+	GridLayout(int rows, int columns);
 	~GridLayout();
 
-	void InitGrid(const int width, const int height, const int texWidth, const int texHeight);
-	size_t GetSize() const { return m_grid.size(); }
+	void InitGrid(int width, int height, int texWidth, int texHeight);
+	[[nodiscard]] size_t GetSize() const { return m_grid.size(); }
 	void BuildDeck(const std::vector<std::string>& frontKeys);
 	
 	std::map<int, SDL_FRect> m_grid;

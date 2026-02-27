@@ -47,7 +47,8 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     
     g_game = std::make_unique<Game>(g_window, g_renderer, WINDOW_WIDTH, WINDOW_HEIGHT);
     g_game->Init();
-    
+    g_game->Start();
+
     return SDL_APP_CONTINUE;  // carry on with the program!
 }
 
@@ -67,17 +68,17 @@ SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
     if (event->type == SDL_EVENT_MOUSE_BUTTON_DOWN) 
     {
         SDL_Log("Current Mouse position is: (%f, %f)", event->button.x, event->button.y);
-        
+
         int result = g_game->HitTest(event->button.x, event->button.y);
         if (result < 0)
-        {
             g_shouldQuit = true;
-        }
+
         if (result > 0)
         {
             g_game.reset();
             g_game = std::make_unique<Game>(g_window, g_renderer, WINDOW_WIDTH, WINDOW_HEIGHT);
             g_game->Init();
+            g_game->Run();
         }
         
     }
@@ -99,10 +100,8 @@ void SDL_AppQuit(void* appstate, SDL_AppResult result)
 {
     // SDL will clean up the window/renderer for us.
     if (g_game)
-    {
-        //g_game->ShutdownGame();
         g_game.reset();
-    }
+
     if (g_renderer)
     {
         SDL_DestroyRenderer(g_renderer);
