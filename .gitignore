@@ -15,7 +15,11 @@ Desktop.ini
 *.suo
 *.user
 *.userosscache
+*.sln
 *.sln.docstates
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
 
 # MSVC build artifacts
 *.obj
