@@ -9,18 +9,18 @@
 #include <SDL3/SDL_pixels.h>
 #include <SDL3/SDL_rect.h>
 #include <SDL3/SDL_render.h>
+#include <SDL3/SDL_stdinc.h>
 #include <SDL3/SDL_timer.h>
 #include <SDL3/SDL_video.h>
 
 #include <memory>
 #include <string>
 #include <vector>
-#include <SDL3/SDL_stdinc.h>
 
 constexpr auto TEX_WIDTH = 32 * 3;
 constexpr auto TEX_HEIGHT = 32 * 3;
 
-Game::Game(SDL_Window* window, SDL_Renderer* renderer, int width, int height)
+Game::Game(SDL_Window* window, SDL_Renderer* renderer, const int width, const int height)
     :
     m_window(window), m_renderer(renderer),
     m_windowWidth(width), m_windowHeight(height),
@@ -52,9 +52,8 @@ int Game::Init()
     
     m_assetManager->LoadTexture("PlayButton");
     m_assetManager->LoadTexture("QuitButton");
-    
+
     m_grid = std::make_unique<GridLayout>(numOfCards/2, 4);
-    
     m_grid->BuildDeck(testingCards);
     m_grid->InitGrid(m_windowWidth, m_windowHeight, TEX_WIDTH, TEX_HEIGHT);
 
@@ -72,9 +71,22 @@ int Game::Init()
     m_quitButtonRect.w = TEX_WIDTH;
     m_quitButtonRect.h = TEX_HEIGHT;
 
-    m_gameState = GameState::Starting;
-
     return 0;
+}
+
+void Game::Start()
+{
+    m_gameState = GameState::Starting;
+}
+
+void Game::Run()
+{
+    m_gameState = GameState::Running;
+}
+
+void Game::ShutdownGame() const
+{
+    m_soundSystem->ShutdownSound();
 }
 
 int Game::Update()
@@ -83,12 +95,13 @@ int Game::Update()
     // we'll have some textures move around over a few seconds.
     //const float direction = ((now % 2000) >= 1000) ? 1.0f : -1.0f;
     //const float scale = ((float)(((int)(now % 1000)) - 500) / 500.0f) * direction;
-    
+
     int result = 0;
     switch (m_gameState)
     {
     case Game::GameState::Running:
         UpdateGameplay();
+        Render();
         break;
     case Game::GameState::Ended:
         UpdateEndScreen();
@@ -137,30 +150,9 @@ void Game::UpdateGameplay()
             m_cardsSelected = CardSelected::NoCard;
 
             if (m_numOfCardsMatched == m_grid->GetSize())
-            {
                 m_gameState = GameState::Ended;
-                return;
-            }
         }
     }
-
-    // Iterate over GridLayout and render
-    const int size = static_cast<int>(m_grid->GetSize());
-    for (int i = 0; i < size; ++i)
-    {
-        SDL_Texture* tex = m_assetManager->GetTexture("Back");
-        auto& card = m_grid->m_cards.at(i);
-        auto& rect = m_grid->m_grid.at(i);
-
-        if (card.state != CardState::FaceDown)
-        {
-            tex = m_assetManager->GetTexture(card.frontKey);
-        }
-
-        SDL_RenderTexture(m_renderer, tex, nullptr, &rect);
-    }
-
-    SDL_RenderPresent(m_renderer);
 }
 
 void Game::UpdateEndScreen() const
@@ -213,9 +205,25 @@ void Game::UpdateStartScreen() const
     SDL_RenderPresent(m_renderer);
 }
 
-void Game::ShutdownGame() const
+void Game::Render() const
 {
-    m_soundSystem->ShutdownSound();
+    // Iterate over GridLayout and render
+    const int size = static_cast<int>(m_grid->GetSize());
+    for (int i = 0; i < size; ++i)
+    {
+        SDL_Texture* tex = m_assetManager->GetTexture("Back");
+        auto& card = m_grid->m_cards.at(i);
+        auto& rect = m_grid->m_grid.at(i);
+
+        if (card.state != CardState::FaceDown)
+        {
+            tex = m_assetManager->GetTexture(card.frontKey);
+        }
+
+        SDL_RenderTexture(m_renderer, tex, nullptr, &rect);
+    }
+
+    SDL_RenderPresent(m_renderer);
 }
 
 void Game::Resize()
@@ -224,36 +232,34 @@ void Game::Resize()
     m_grid->InitGrid(m_windowWidth, m_windowHeight, TEX_WIDTH, TEX_HEIGHT);
 }
 
+// NOTE: return 0 if game loop should continue
 int Game::HitTest(const float x, const float y)
 {
     // HitTests are locked if two Cards are currently faceUp
     if (m_cardsSelected == CardSelected::TwoCards)
         return 0;
 
-    // TODO: why is this not a SDL_FPoint?
-    const SDL_Point p = { static_cast<int>(x), static_cast<int>(y) };
-
-    const SDL_FPoint fp = { x,y };
+    const SDL_FPoint p = { x,y };
     if (m_gameState == GameState::Starting)
     {
-        if (SDL_PointInRectFloat(&fp, &m_playButtonRect))
+        if (SDL_PointInRectFloat(&p, &m_playButtonRect))
         {
-            m_gameState = GameState::Running;
+            Run();
             return 0;
         }
-        if (SDL_PointInRectFloat(&fp, &m_quitButtonRect))
+        if (SDL_PointInRectFloat(&p, &m_quitButtonRect))
             return -1;
     }
 
     // Check UI Buttons
     if (m_gameState == GameState::Ended)
     {
-        if (SDL_PointInRectFloat(&fp, &m_playButtonRect))
+        if (SDL_PointInRectFloat(&p, &m_playButtonRect))
         {
             // Reset Game
             return 1;
         }
-        if (SDL_PointInRectFloat(&fp, &m_quitButtonRect))
+        if (SDL_PointInRectFloat(&p, &m_quitButtonRect))
         {
             // Quit Game
             return -1;
@@ -271,13 +277,9 @@ int Game::HitTest(const float x, const float y)
             continue;
 
         // Check if Grid was hit
-        const auto& gridRect = m_grid->m_grid.at(i);
-        SDL_Rect rc
-        { 
-            static_cast<int>(gridRect.x), static_cast<int>(gridRect.y),
-            static_cast<int>(gridRect.w), static_cast<int>(gridRect.h)
-        };
-        if (!SDL_PointInRect(&p, &rc))
+        const auto& [gx, gy, gw, gh] = m_grid->m_grid.at(i);
+        SDL_FRect rc{ gx, gy, gw, gh};
+        if (!SDL_PointInRectFloat(&p, &rc))
             continue;
 
         // Do nothing if the same Card is clicked repeatedly
@@ -291,12 +293,12 @@ int Game::HitTest(const float x, const float y)
         // Current Card is the first Card that was clicked
         if (m_cardsSelected == CardSelected::NoCard) 
         {
-            m_firstCardIdx = static_cast<int>(i);
+            m_firstCardIdx = i;
             m_cardsSelected = CardSelected::OneCard;
             return 0;
         }
 
-        m_secondCardIdx = static_cast<int>(i);
+        m_secondCardIdx = i;
         m_cardsSelected = CardSelected::TwoCards;
         m_resolveCardsAtMs = SDL_GetTicks() + m_revealDelayMs;
     }

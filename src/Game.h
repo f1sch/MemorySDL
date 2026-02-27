@@ -19,12 +19,16 @@ public:
 	~Game();
 
 	int Init();
+	void Start();
+	void Run();
 	void ShutdownGame() const;
 	
 	int Update();
 	void UpdateGameplay();
 	void UpdateEndScreen() const;
 	void UpdateStartScreen() const;
+
+	void Render() const;
 
 	void Resize();
 
