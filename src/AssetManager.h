@@ -8,7 +8,7 @@
 class AssetManager
 {
 public:
-	AssetManager(SDL_Renderer* renderer);
+	explicit AssetManager(SDL_Renderer* renderer);
 	~AssetManager();
 
 	void LoadTexture(const std::string& key);
