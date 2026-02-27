@@ -16,30 +16,29 @@ GridLayout::GridLayout(const int rows, const int columns)
 }
 
 GridLayout::~GridLayout()
-{
-}
+= default;
 
 void GridLayout::InitGrid(const int width, const int height, const int texWidth, const int texHeight)
 {
-    float margin = 5.f;
-    float gridWidth = m_columns * texWidth + (m_columns - 1) * margin;
-    float gridHeight = m_rows * texHeight + (m_rows - 1) * margin;
+    constexpr float margin = 5.f;
+    const float gridWidth = static_cast<float>(m_columns) * static_cast<float>(texWidth) + (static_cast<float>(m_columns) - 1) * margin;
+    const float gridHeight = static_cast<float>(m_rows) * static_cast<float>(texHeight) + (static_cast<float>(m_rows) - 1) * margin;
 
-    float startX = (width - gridWidth) * 0.5f;
-    float startY = (height - gridHeight) * 0.5f;
+    const float startX = (static_cast<float>(width) - gridWidth) * 0.5f;
+    const float startY = (static_cast<float>(height) - gridHeight) * 0.5f;
 
     m_grid.clear();
-    const int size = static_cast<size_t>(m_rows * m_columns);
+    const int size = m_rows * m_columns;
     for (int i = 0; i < size; ++i)
     {
-        int row = static_cast<int>(i) / m_columns;
-        int col = static_cast<int>(i) % m_columns;
+        const int row = i / m_columns;
+        const int col = i % m_columns;
 
         m_grid.insert(
             { m_cards.at(i).uniqueId, SDL_FRect{
-            startX + col * (texWidth + margin),
-            startY + row * (texHeight + margin),
-            (float)texWidth, (float)texHeight
+            startX + static_cast<float>(col) * (static_cast<float>(texWidth) + margin),
+            startY + static_cast<float>(row) * (static_cast<float>(texHeight) + margin),
+            static_cast<float>(texWidth), static_cast<float>(texHeight)
             } }
         );
     }
@@ -63,5 +62,5 @@ void GridLayout::BuildDeck(const std::vector<std::string>& frontKeys)
     }
 
     std::mt19937 rng{ std::random_device{}() };
-    std::shuffle(m_cards.begin(), m_cards.end(), rng);
+    std::ranges::shuffle(m_cards, rng);
 }

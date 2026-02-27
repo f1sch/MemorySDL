@@ -18,7 +18,7 @@ AssetManager::AssetManager(SDL_Renderer* renderer)
 
 AssetManager::~AssetManager()
 {
-    for (auto& t: m_textures)
+    for (const auto& t: m_textures)
     {
         SDL_DestroyTexture(t.second);
     }
@@ -26,10 +26,10 @@ AssetManager::~AssetManager()
 
 void AssetManager::LoadTexture(const std::string& key)
 {
-    SDL_Surface* surface = NULL;
-    char* png_path = NULL;
-    std::string path = "assets/";
-    std::string imageType = ".png";
+    SDL_Surface* surface = nullptr;
+    char* png_path = nullptr;
+    const std::string path = "assets/";
+    const std::string imageType = ".png";
     // Textures are pixel data that we upload to the video hardware for fast drawing. Lots of 2D
     // engines refer to these as "sprites." We'll do a static texture (upload once, draw many
     // times) with data from a bitmap file.
@@ -58,7 +58,7 @@ void AssetManager::LoadTexture(const std::string& key)
 
 SDL_Texture* AssetManager::GetTexture(const std::string& key) const
 {
-    std::unordered_map<std::string, SDL_Texture*>::const_iterator it = m_textures.find(key);
+    const auto it = m_textures.find(key);
     
     if (it == m_textures.end())
         SDL_Log("Texture not found");
