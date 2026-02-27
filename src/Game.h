@@ -19,11 +19,12 @@ public:
 	~Game();
 
 	int Init();
-	void ShutdownGame();
+	void ShutdownGame() const;
 	
 	int Update();
 	void UpdateGameplay();
-	void UpdateEndScreen();
+	void UpdateEndScreen() const;
+	void UpdateStartScreen() const;
 
 	void Resize();
 
@@ -49,7 +50,7 @@ private:
 	bool quitPressed = false;
 
 	// State
-	enum class GameState { Running, Ended, Paused };
+	enum class GameState { Running, Ended, Paused, Starting };
 	GameState m_gameState;
 	size_t m_numOfCardsMatched = 0;
 	CardSelected m_cardsSelected;
