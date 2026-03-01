@@ -29,6 +29,9 @@ public:
 	void UpdateEndScreen() const;
 	void UpdateStartScreen() const;
 
+	int HandleStartingState(const SDL_FPoint& p);
+	[[nodiscard]] int HandleEndingState(const SDL_FPoint& p) const;
+
 	void Render() const;
 	void RenderUI() const;
 
@@ -67,6 +70,6 @@ private:
 	Uint64 m_resolveCardsAtMs = 0;
 	static constexpr Uint64 m_revealDelayMs = 800;
 
-	int m_attempts = 3;
+	int m_attempts = 5;
 };
 

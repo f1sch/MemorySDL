@@ -76,7 +76,7 @@ int Game::Init()
     const auto size = static_cast<size_t>(m_attempts);
     m_uiHeartRects.resize(size);
     for (size_t i = 0; i < size; ++i) {
-        m_uiHeartRects[i].x = static_cast<float>(m_windowWidth) * 0.5f + static_cast<float>(TEX_WIDTH * i);
+        m_uiHeartRects[i].x = (static_cast<float>(m_windowWidth) * 0.5f + static_cast<float>(TEX_WIDTH * i) - static_cast<float>(TEX_WIDTH * m_attempts)/2);
         m_uiHeartRects[i].y = static_cast<float>(m_windowHeight) * 0.001f;
         m_uiHeartRects[i].w = static_cast<float>(TEX_WIDTH);
         m_uiHeartRects[i].h = static_cast<float>(TEX_HEIGHT);
@@ -229,6 +229,34 @@ void Game::UpdateStartScreen() const
     SDL_RenderPresent(m_renderer);
 }
 
+int Game::HandleStartingState(const SDL_FPoint &p)
+{
+    if (SDL_PointInRectFloat(&p, &m_uiPlayButtonRect))
+    {
+        Run();
+        return 0;
+    }
+    if (SDL_PointInRectFloat(&p, &m_uiQuitButtonRect))
+        return -1;
+
+    return 0;
+}
+
+int Game::HandleEndingState(const SDL_FPoint &p) const
+{
+    if (SDL_PointInRectFloat(&p, &m_uiPlayButtonRect))
+    {
+        // Reset Game
+        return 1;
+    }
+    if (SDL_PointInRectFloat(&p, &m_uiQuitButtonRect))
+    {
+        // Quit Game
+        return -1;
+    }
+    return 0;
+}
+
 void Game::Render() const
 {
     // Iterate over GridLayout and render
@@ -278,28 +306,13 @@ int Game::HitTest(const float x, const float y)
     switch (m_gameState)
     {
         case GameState::Starting:
-            if (SDL_PointInRectFloat(&p, &m_uiPlayButtonRect))
-            {
-                Run();
-                return 0;
-            }
-            if (SDL_PointInRectFloat(&p, &m_uiQuitButtonRect))
-                return -1;
-            break;
+            return HandleStartingState(p);
         case GameState::Running:
             break;
         case GameState::Ended:
-            if (SDL_PointInRectFloat(&p, &m_uiPlayButtonRect))
-            {
-                // Reset Game
-                return 1;
-            }
-            if (SDL_PointInRectFloat(&p, &m_uiQuitButtonRect))
-            {
-                // Quit Game
-                return -1;
-            }
-        default: return 0;
+            return HandleEndingState(p);
+        default:
+            return 0;
     }
 
     const int size = static_cast<int>(m_grid->GetSize());
