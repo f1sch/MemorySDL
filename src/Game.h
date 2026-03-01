@@ -6,6 +6,7 @@
 #include <SDL3/SDL_video.h>
 
 #include <memory>
+#include <vector>
 
 class AssetManager;
 class GridLayout;
@@ -29,6 +30,7 @@ public:
 	void UpdateStartScreen() const;
 
 	void Render() const;
+	void RenderUI() const;
 
 	void Resize();
 
@@ -46,12 +48,14 @@ private:
 	std::unique_ptr<SoundSystem> m_soundSystem;
 
 	// UI
-	const char* m_playButtonText = "PLAY";
-	const char* m_quitButtonText = "QUIT";
-	SDL_FRect m_playButtonRect{};
-	SDL_FRect m_quitButtonRect{};
-	bool playPressed = false;
-	bool quitPressed = false;
+	const char* m_uiPlayButtonText = "PLAY";
+	const char* m_uiQuitButtonText = "QUIT";
+	SDL_FRect m_uiPlayButtonRect{};
+	SDL_FRect m_uiQuitButtonRect{};
+	bool uiPlayPressed = false;
+	bool uiQuitPressed = false;
+
+	std::vector<SDL_FRect> m_uiHeartRects{};
 
 	// State
 	enum class GameState { Running, Ended, Paused, Starting };
@@ -62,5 +66,7 @@ private:
 	int m_secondCardIdx = -1;
 	Uint64 m_resolveCardsAtMs = 0;
 	static constexpr Uint64 m_revealDelayMs = 800;
+
+	int m_attempts = 3;
 };
 
