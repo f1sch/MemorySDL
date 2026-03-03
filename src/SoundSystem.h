@@ -20,13 +20,17 @@ public:
     void LoopSfxSound(SoundId id);
     void LoopMusic(SoundId id);
 
+    bool IsInitialised() const;
+
 private:
     struct SoundData
     {
         Uint8* wavData;
         Uint32 wavDataLen;
     };
-	
+
+    bool m_initialised;
+
     SDL_AudioDeviceID m_device;
     SDL_AudioStream* m_musicStream;
     SDL_AudioStream* m_sfxStream;

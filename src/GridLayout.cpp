@@ -11,7 +11,7 @@
 #include <vector>
 
 GridLayout::GridLayout(const int rows, const int columns)
-    : m_rows(rows), m_columns(columns)
+    : m_rng(std::random_device{}()), m_rows(rows), m_columns(columns)
 {
 }
 
@@ -60,7 +60,17 @@ void GridLayout::BuildDeck(const std::vector<std::string>& frontKeys)
         m_cards.push_back(b);
         ++pairId;
     }
+}
 
-    std::mt19937 rng{ std::random_device{}() };
-    std::ranges::shuffle(m_cards, rng);
+void GridLayout::ShuffleDeck()
+{
+    std::ranges::shuffle(m_cards.begin(), m_cards.end(), m_rng);
+}
+
+void GridLayout::ResetCardStates()
+{
+    for (auto& card : m_cards)
+    {
+        card.state = CardState::FaceDown;
+    }
 }

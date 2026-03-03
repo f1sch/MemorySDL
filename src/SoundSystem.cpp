@@ -10,10 +10,9 @@
 #include <string>
 
 SoundSystem::SoundSystem()
-    : m_device{}, 
-    m_musicStream(nullptr), m_sfxStream(nullptr), 
-    m_deviceSpec{}
-{
+    : m_initialised(false), m_device{},
+      m_musicStream(nullptr), m_sfxStream(nullptr),
+      m_deviceSpec{} {
 }
 
 SoundSystem::~SoundSystem()
@@ -53,6 +52,8 @@ void SoundSystem::Init()
 
     LoadSound(SoundId::Background, "assets/spooky.wav");
     LoadSound(SoundId::CardFlip, "assets/cardFlip.wav");
+
+    m_initialised = true;
 }
 
 void SoundSystem::ShutdownSound()
@@ -78,6 +79,8 @@ void SoundSystem::ShutdownSound()
     {
         SDL_free(sound.wavData);
     }
+
+    m_initialised = false;
 }
 
 void SoundSystem::PlaySfxSound(const SoundId id)
@@ -145,4 +148,8 @@ void SoundSystem::LoopMusic(const SoundId id)
     {
         SDL_PutAudioStreamData(m_musicStream, m_sounds[id].wavData, static_cast<int>(m_sounds[id].wavDataLen));
     }
+}
+
+bool SoundSystem::IsInitialised() const {
+    return m_initialised;
 }

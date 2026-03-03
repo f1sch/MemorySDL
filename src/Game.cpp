@@ -20,13 +20,13 @@
 constexpr auto TEX_WIDTH = 32 * 3;
 constexpr auto TEX_HEIGHT = 32 * 3;
 
+constexpr auto MAX_ATTEMPTS = 5;
+
 Game::Game(SDL_Window* window, SDL_Renderer* renderer, const int width, const int height)
-    :
-    m_window(window), m_renderer(renderer),
-    m_windowWidth(width), m_windowHeight(height),
-    m_gameState(GameState::Paused),
-    m_cardsSelected(CardSelected::NoCard)
-{
+    : m_window(window), m_renderer(renderer),
+      m_windowWidth(width), m_windowHeight(height),
+      m_gameState(GameState::Paused), m_scene(),
+      m_cardsSelected(CardSelected::NoCard), m_attempts(MAX_ATTEMPTS) {
 }
 
 Game::~Game()
@@ -57,10 +57,15 @@ int Game::Init()
 
     m_grid = std::make_unique<GridLayout>(numOfCards/2, 4);
     m_grid->BuildDeck(testingCards);
+    m_grid->ShuffleDeck();
     m_grid->InitGrid(m_windowWidth, m_windowHeight, TEX_WIDTH, TEX_HEIGHT);
 
     m_soundSystem = std::make_unique<SoundSystem>();
+#ifdef __EMSCRIPTEN__
+    // only load on mouse input to start
+#else
     m_soundSystem->Init();
+#endif
 
     // UI
     m_uiPlayButtonRect.x = static_cast<float>(m_windowWidth) * 0.15f;
@@ -73,7 +78,7 @@ int Game::Init()
     m_uiQuitButtonRect.w = static_cast<float>(TEX_WIDTH);
     m_uiQuitButtonRect.h = static_cast<float>(TEX_HEIGHT);
 
-    const auto size = static_cast<size_t>(m_attempts);
+    constexpr auto size = static_cast<size_t>(MAX_ATTEMPTS);
     m_uiHeartRects.resize(size);
     for (size_t i = 0; i < size; ++i) {
         m_uiHeartRects[i].x = (static_cast<float>(m_windowWidth) * 0.5f + static_cast<float>(TEX_WIDTH * i) - static_cast<float>(TEX_WIDTH * m_attempts)/2);
@@ -88,6 +93,22 @@ int Game::Init()
 void Game::Start()
 {
     m_gameState = GameState::Starting;
+}
+
+void Game::Restart()
+{
+    // shuffle deck
+    m_grid->ShuffleDeck();
+    // reset card states to FaceDown
+    m_grid->ResetCardStates();
+    // reset attempts
+    m_attempts = MAX_ATTEMPTS;
+    // reset state
+    m_numOfCardsMatched = 0;
+    m_cardsSelected = CardSelected::NoCard;
+    m_firstCardIdx = -1;
+    m_secondCardIdx = -1;
+    // change scene
 }
 
 void Game::Run()
@@ -132,6 +153,11 @@ int Game::Update()
     return result;
 }
 
+Game::GameCommand Game::OnMouseDown(const float x, const float y)
+{
+    return HitTest(x,y);
+}
+
 void Game::UpdateGameplay()
 {
     SDL_SetRenderDrawColor(m_renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
@@ -165,7 +191,6 @@ void Game::UpdateGameplay()
                     a.state = CardState::FaceDown;
                     b.state = CardState::FaceDown;
                     m_attempts--;
-                    m_uiHeartRects.resize(m_attempts);
                 }
 
                 m_firstCardIdx = -1;
@@ -229,32 +254,28 @@ void Game::UpdateStartScreen() const
     SDL_RenderPresent(m_renderer);
 }
 
-int Game::HandleStartingState(const SDL_FPoint &p)
+Game::GameCommand Game::HandleStartingState(const SDL_FPoint &p)
 {
     if (SDL_PointInRectFloat(&p, &m_uiPlayButtonRect))
     {
         Run();
-        return 0;
+        return GameCommand::None;
     }
     if (SDL_PointInRectFloat(&p, &m_uiQuitButtonRect))
-        return -1;
+        return GameCommand::Quit;
 
-    return 0;
+    return GameCommand::None;
 }
 
-int Game::HandleEndingState(const SDL_FPoint &p) const
+Game::GameCommand Game::HandleEndingState(const SDL_FPoint &p) const
 {
     if (SDL_PointInRectFloat(&p, &m_uiPlayButtonRect))
-    {
-        // Reset Game
-        return 1;
-    }
+        return GameCommand::Restart;
+
     if (SDL_PointInRectFloat(&p, &m_uiQuitButtonRect))
-    {
-        // Quit Game
-        return -1;
-    }
-    return 0;
+        return GameCommand::Quit;
+
+    return GameCommand::None;
 }
 
 void Game::Render() const
@@ -283,8 +304,9 @@ void Game::RenderUI() const
 {
     // Render Attempts
     const auto tex = m_assetManager->GetTexture("UI_Heart");
-    for (auto rect: m_uiHeartRects) {
-        SDL_RenderTexture(m_renderer, tex, nullptr, &rect);
+    for (int i = 0; i < m_attempts; ++i)
+    {
+        SDL_RenderTexture(m_renderer, tex, nullptr, &m_uiHeartRects[i]);
     }
     // TODO: Render Time
 }
@@ -295,12 +317,11 @@ void Game::Resize()
     m_grid->InitGrid(m_windowWidth, m_windowHeight, TEX_WIDTH, TEX_HEIGHT);
 }
 
-// NOTE: return 0 if game loop should continue
-int Game::HitTest(const float x, const float y)
+Game::GameCommand Game::HitTest(const float x, const float y)
 {
     // HitTests are locked if two Cards are currently faceUp
     if (m_cardsSelected == CardSelected::TwoCards)
-        return 0;
+        return GameCommand::None;
 
     const SDL_FPoint p = { x,y };
     switch (m_gameState)
@@ -312,7 +333,7 @@ int Game::HitTest(const float x, const float y)
         case GameState::Ended:
             return HandleEndingState(p);
         default:
-            return 0;
+            return GameCommand::None;
     }
 
     const int size = static_cast<int>(m_grid->GetSize());
@@ -332,7 +353,7 @@ int Game::HitTest(const float x, const float y)
 
         // Do nothing if the same Card is clicked repeatedly
         if (m_cardsSelected == CardSelected::OneCard && m_firstCardIdx == i)
-            return 0;
+            return GameCommand::None;
 
         m_soundSystem->PlaySfxSound(SoundSystem::SoundId::CardFlip);
 
@@ -343,12 +364,12 @@ int Game::HitTest(const float x, const float y)
         {
             m_firstCardIdx = i;
             m_cardsSelected = CardSelected::OneCard;
-            return 0;
+            return GameCommand::None;
         }
 
         m_secondCardIdx = i;
         m_cardsSelected = CardSelected::TwoCards;
         m_resolveCardsAtMs = SDL_GetTicks() + m_revealDelayMs;
     }
-    return 0;
+    return GameCommand::None;
 }

@@ -57,3 +57,13 @@ if (WIN32)
             $<TARGET_FILE_DIR:MemorySDL>
     )
 endif()
+
+if (EMSCRIPTEN)
+    message(STATUS "Building for Web (Emscripten)")
+    set(CMAKE_EXECUTABLE_SUFFIX ".html")
+    target_link_options(MemorySDL PRIVATE
+        "--preload-file" "${CMAKE_SOURCE_DIR}/assets@/assets"
+        "-sUSE_SDL=3"
+        "-sALLOW_MEMORY_GROWTH=1"
+    )
+endif()
