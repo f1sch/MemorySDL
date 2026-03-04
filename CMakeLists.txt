@@ -72,6 +72,8 @@ if (EMSCRIPTEN)
     target_link_options(MemorySDL PRIVATE
         "-O3"
         "-sALLOW_MEMORY_GROWTH=1"
+        "-sINITIAL_MEMORY=64MB"
+        "-sUSE_SDL=3"
         "--preload-file" "${CMAKE_SOURCE_DIR}/assets@/assets"
         "--shell-file" "${CMAKE_SOURCE_DIR}/web/index.html"
     )
