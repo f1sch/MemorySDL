@@ -20,13 +20,13 @@
 constexpr auto TEX_WIDTH = 32 * 3;
 constexpr auto TEX_HEIGHT = 32 * 3;
 
+constexpr auto MAX_ATTEMPTS = 5;
+
 Game::Game(SDL_Window* window, SDL_Renderer* renderer, const int width, const int height)
-    :
-    m_window(window), m_renderer(renderer),
-    m_windowWidth(width), m_windowHeight(height),
-    m_gameState(GameState::Paused),
-    m_cardsSelected(CardSelected::NoCard)
-{
+    : m_window(window), m_renderer(renderer),
+      m_windowWidth(width), m_windowHeight(height),
+      m_gameState(GameState::Paused), m_scene(),
+      m_cardsSelected(CardSelected::NoCard), m_attempts(MAX_ATTEMPTS) {
 }
 
 Game::~Game()
@@ -36,10 +36,10 @@ Game::~Game()
 
 int Game::Init()
 {
-    const std::vector<std::string> frontCards = { "Skull", "Coffin", "Candle", "Dagger", "Bat", "Door" };
+    const std::vector<std::string> frontCards = { "Card_Skull", "Card_Coffin", "Card_Candle", "Card_Dagger", "Card_Bat", "Card_Door" };
     
     m_assetManager = std::make_unique<AssetManager>(m_renderer);
-    m_assetManager->LoadTexture("Back");
+    m_assetManager->LoadTexture("Card_Back");
     
     // TESTING:
     constexpr int numOfCards = 6; // set to number of cards that will be rendered
@@ -49,27 +49,43 @@ int Game::Init()
         m_assetManager->LoadTexture(frontCards[i]);
         testingCards.push_back(frontCards[i]);
     }
-    
-    m_assetManager->LoadTexture("PlayButton");
-    m_assetManager->LoadTexture("QuitButton");
+    const std::vector<std::string> uiTextures = { "UI_PlayButton", "UI_QuitButton", "UI_Heart"};
+    for (const auto& tex : uiTextures)
+    {
+        m_assetManager->LoadTexture(tex);
+    }
 
     m_grid = std::make_unique<GridLayout>(numOfCards/2, 4);
     m_grid->BuildDeck(testingCards);
+    m_grid->ShuffleDeck();
     m_grid->InitGrid(m_windowWidth, m_windowHeight, TEX_WIDTH, TEX_HEIGHT);
 
     m_soundSystem = std::make_unique<SoundSystem>();
     m_soundSystem->Init();
+    // only load on mouse input to start
+#ifdef __EMSCRIPTEN__
+#else
+#endif
 
     // UI
-    m_playButtonRect.x = static_cast<float>(m_windowWidth) * 0.15f;
-    m_playButtonRect.y = static_cast<float>(m_windowHeight) * 0.75f;
-    m_playButtonRect.w = TEX_WIDTH;
-    m_playButtonRect.h = TEX_HEIGHT;
+    m_uiPlayButtonRect.x = static_cast<float>(m_windowWidth) * 0.15f;
+    m_uiPlayButtonRect.y = static_cast<float>(m_windowHeight) * 0.75f;
+    m_uiPlayButtonRect.w = static_cast<float>(TEX_WIDTH);
+    m_uiPlayButtonRect.h = static_cast<float>(TEX_HEIGHT);
 
-    m_quitButtonRect.x = static_cast<float>(m_windowWidth) * 0.75f;
-    m_quitButtonRect.y = static_cast<float>(m_windowHeight) * 0.75f;
-    m_quitButtonRect.w = TEX_WIDTH;
-    m_quitButtonRect.h = TEX_HEIGHT;
+    m_uiQuitButtonRect.x = static_cast<float>(m_windowWidth) * 0.75f;
+    m_uiQuitButtonRect.y = static_cast<float>(m_windowHeight) * 0.75f;
+    m_uiQuitButtonRect.w = static_cast<float>(TEX_WIDTH);
+    m_uiQuitButtonRect.h = static_cast<float>(TEX_HEIGHT);
+
+    constexpr auto size = static_cast<size_t>(MAX_ATTEMPTS);
+    m_uiHeartRects.resize(size);
+    for (size_t i = 0; i < size; ++i) {
+        m_uiHeartRects[i].x = (static_cast<float>(m_windowWidth) * 0.5f + static_cast<float>(TEX_WIDTH * i) - static_cast<float>(TEX_WIDTH * m_attempts)/2);
+        m_uiHeartRects[i].y = static_cast<float>(m_windowHeight) * 0.001f;
+        m_uiHeartRects[i].w = static_cast<float>(TEX_WIDTH);
+        m_uiHeartRects[i].h = static_cast<float>(TEX_HEIGHT);
+    }
 
     return 0;
 }
@@ -77,6 +93,22 @@ int Game::Init()
 void Game::Start()
 {
     m_gameState = GameState::Starting;
+}
+
+void Game::Restart()
+{
+    // shuffle deck
+    m_grid->ShuffleDeck();
+    // reset card states to FaceDown
+    m_grid->ResetCardStates();
+    // reset attempts
+    m_attempts = MAX_ATTEMPTS;
+    // reset state
+    m_numOfCardsMatched = 0;
+    m_cardsSelected = CardSelected::NoCard;
+    m_firstCardIdx = -1;
+    m_secondCardIdx = -1;
+    // change scene
 }
 
 void Game::Run()
@@ -99,26 +131,42 @@ int Game::Update()
     int result = 0;
     switch (m_gameState)
     {
-    case Game::GameState::Running:
+    case GameState::Running:
         UpdateGameplay();
         Render();
         break;
-    case Game::GameState::Ended:
+    case GameState::Ended:
         UpdateEndScreen();
         result = -1;
         break;
-    case Game::GameState::Paused:
+    case GameState::Paused:
         break;
-    case Game::GameState::Starting:
+    case GameState::Starting:
         UpdateStartScreen();
         break;
     default:
         break;
     }
 
-    m_soundSystem->LoopMusic(SoundSystem::SoundId::Background);
-
+    //m_soundSystem->PlayMusic(SoundSystem::SoundId::Background);
+#ifdef __EMSCRIPTEN__
+    if (m_soundSystem->IsMusicStarted())
+        m_soundSystem->Update();
+#else
+    m_soundSystem->Update();
+#endif
     return result;
+}
+
+Game::GameCommand Game::OnMouseDown(const float x, const float y)
+{
+#ifdef __EMSCRIPTEN__
+    if (!m_soundSystem->IsMusicStarted()) {
+        m_soundSystem->SetMusicStarted(true);
+        m_soundSystem->Update();
+    }
+#endif
+    return HitTest(x,y);
 }
 
 void Game::UpdateGameplay()
@@ -126,32 +174,44 @@ void Game::UpdateGameplay()
     SDL_SetRenderDrawColor(m_renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
     SDL_RenderClear(m_renderer);
 
-    if (m_cardsSelected == CardSelected::TwoCards)
+    if (m_attempts < 1)
     {
-        if (SDL_GetTicks() >= m_resolveCardsAtMs)
-        {
-            Card& a = m_grid->m_cards.at(m_firstCardIdx);
-            Card& b = m_grid->m_cards.at(m_secondCardIdx);
+        m_gameState = GameState::Ended; // NOTE: is it better to call a func that sets state?
+        return;
+    }
 
-            if (a.pairId == b.pairId)
+    switch (m_cardsSelected)
+    {
+        case CardSelected::NoCard:
+        case CardSelected::OneCard:
+            break;
+        case CardSelected::TwoCards:
+            if (SDL_GetTicks() >= m_resolveCardsAtMs)
             {
-                a.state = CardState::Matched;
-                b.state = CardState::Matched;
-                m_numOfCardsMatched += 2;
-            }
-            else
-            {
-                a.state = CardState::FaceDown;
-                b.state = CardState::FaceDown;
-            }
+                Card& a = m_grid->m_cards.at(m_firstCardIdx);
+                Card& b = m_grid->m_cards.at(m_secondCardIdx);
 
-            m_firstCardIdx = -1;
-            m_secondCardIdx = -1;
-            m_cardsSelected = CardSelected::NoCard;
+                if (a.pairId == b.pairId)
+                {
+                    a.state = CardState::Matched;
+                    b.state = CardState::Matched;
+                    m_numOfCardsMatched += 2;
+                }
+                else
+                {
+                    a.state = CardState::FaceDown;
+                    b.state = CardState::FaceDown;
+                    m_attempts--;
+                }
 
-            if (m_numOfCardsMatched == m_grid->GetSize())
-                m_gameState = GameState::Ended;
-        }
+                m_firstCardIdx = -1;
+                m_secondCardIdx = -1;
+                m_cardsSelected = CardSelected::NoCard;
+
+                if (m_numOfCardsMatched == m_grid->GetSize())
+                    m_gameState = GameState::Ended;
+            }
+        default: ;
     }
 }
 
@@ -170,12 +230,12 @@ void Game::UpdateEndScreen() const
     SDL_SetRenderScale(m_renderer, 1.0f, 1.0f);
 
     // PlayButton
-    SDL_Texture* play = m_assetManager->GetTexture("PlayButton");
-    SDL_RenderTexture(m_renderer, play, nullptr, &m_playButtonRect);
+    SDL_Texture* play = m_assetManager->GetTexture("UI_PlayButton");
+    SDL_RenderTexture(m_renderer, play, nullptr, &m_uiPlayButtonRect);
 
     // QuitButton
-    SDL_Texture* quit = m_assetManager->GetTexture("QuitButton");
-    SDL_RenderTexture(m_renderer, quit, nullptr, &m_quitButtonRect);
+    SDL_Texture* quit = m_assetManager->GetTexture("UI_QuitButton");
+    SDL_RenderTexture(m_renderer, quit, nullptr, &m_uiQuitButtonRect);
 
     SDL_RenderPresent(m_renderer);
 }
@@ -195,35 +255,71 @@ void Game::UpdateStartScreen() const
     SDL_SetRenderScale(m_renderer, 1.0f, 1.0f);
 
     // PlayButton
-    SDL_Texture* play = m_assetManager->GetTexture("PlayButton");
-    SDL_RenderTexture(m_renderer, play, nullptr, &m_playButtonRect);
+    SDL_Texture* play = m_assetManager->GetTexture("UI_PlayButton");
+    SDL_RenderTexture(m_renderer, play, nullptr, &m_uiPlayButtonRect);
 
     // QuitButton
-    SDL_Texture* quit = m_assetManager->GetTexture("QuitButton");
-    SDL_RenderTexture(m_renderer, quit, nullptr, &m_quitButtonRect);
+    SDL_Texture* quit = m_assetManager->GetTexture("UI_QuitButton");
+    SDL_RenderTexture(m_renderer, quit, nullptr, &m_uiQuitButtonRect);
 
     SDL_RenderPresent(m_renderer);
+}
+
+Game::GameCommand Game::HandleStartingState(const SDL_FPoint &p)
+{
+    if (SDL_PointInRectFloat(&p, &m_uiPlayButtonRect))
+    {
+        Run();
+        return GameCommand::None;
+    }
+    if (SDL_PointInRectFloat(&p, &m_uiQuitButtonRect))
+        return GameCommand::Quit;
+
+    return GameCommand::None;
+}
+
+Game::GameCommand Game::HandleEndingState(const SDL_FPoint &p) const
+{
+    if (SDL_PointInRectFloat(&p, &m_uiPlayButtonRect))
+        return GameCommand::Restart;
+
+    if (SDL_PointInRectFloat(&p, &m_uiQuitButtonRect))
+        return GameCommand::Quit;
+
+    return GameCommand::None;
 }
 
 void Game::Render() const
 {
     // Iterate over GridLayout and render
+    SDL_Texture* cardBack = m_assetManager->GetTexture("Card_Back");
+    SDL_Texture* cardRender{};
     const int size = static_cast<int>(m_grid->GetSize());
     for (int i = 0; i < size; ++i)
     {
-        SDL_Texture* tex = m_assetManager->GetTexture("Back");
         auto& card = m_grid->m_cards.at(i);
         auto& rect = m_grid->m_grid.at(i);
 
         if (card.state != CardState::FaceDown)
-        {
-            tex = m_assetManager->GetTexture(card.frontKey);
-        }
+            cardRender = m_assetManager->GetTexture(card.frontKey);
+        else
+            cardRender = cardBack;
 
-        SDL_RenderTexture(m_renderer, tex, nullptr, &rect);
+        SDL_RenderTexture(m_renderer, cardRender, nullptr, &rect);
     }
-
+    RenderUI();
     SDL_RenderPresent(m_renderer);
+}
+
+void Game::RenderUI() const
+{
+    // Render Attempts
+    const auto tex = m_assetManager->GetTexture("UI_Heart");
+    for (int i = 0; i < m_attempts; ++i)
+    {
+        SDL_RenderTexture(m_renderer, tex, nullptr, &m_uiHeartRects[i]);
+    }
+    // TODO: Render Time
 }
 
 void Game::Resize()
@@ -232,39 +328,23 @@ void Game::Resize()
     m_grid->InitGrid(m_windowWidth, m_windowHeight, TEX_WIDTH, TEX_HEIGHT);
 }
 
-// NOTE: return 0 if game loop should continue
-int Game::HitTest(const float x, const float y)
+Game::GameCommand Game::HitTest(const float x, const float y)
 {
     // HitTests are locked if two Cards are currently faceUp
     if (m_cardsSelected == CardSelected::TwoCards)
-        return 0;
+        return GameCommand::None;
 
     const SDL_FPoint p = { x,y };
-    if (m_gameState == GameState::Starting)
+    switch (m_gameState)
     {
-        if (SDL_PointInRectFloat(&p, &m_playButtonRect))
-        {
-            Run();
-            return 0;
-        }
-        if (SDL_PointInRectFloat(&p, &m_quitButtonRect))
-            return -1;
-    }
-
-    // Check UI Buttons
-    if (m_gameState == GameState::Ended)
-    {
-        if (SDL_PointInRectFloat(&p, &m_playButtonRect))
-        {
-            // Reset Game
-            return 1;
-        }
-        if (SDL_PointInRectFloat(&p, &m_quitButtonRect))
-        {
-            // Quit Game
-            return -1;
-        }
-        return 0;
+        case GameState::Starting:
+            return HandleStartingState(p);
+        case GameState::Running:
+            break;
+        case GameState::Ended:
+            return HandleEndingState(p);
+        default:
+            return GameCommand::None;
     }
 
     const int size = static_cast<int>(m_grid->GetSize());
@@ -284,7 +364,7 @@ int Game::HitTest(const float x, const float y)
 
         // Do nothing if the same Card is clicked repeatedly
         if (m_cardsSelected == CardSelected::OneCard && m_firstCardIdx == i)
-            return 0;
+            return GameCommand::None;
 
         m_soundSystem->PlaySfxSound(SoundSystem::SoundId::CardFlip);
 
@@ -295,12 +375,12 @@ int Game::HitTest(const float x, const float y)
         {
             m_firstCardIdx = i;
             m_cardsSelected = CardSelected::OneCard;
-            return 0;
+            return GameCommand::None;
         }
 
         m_secondCardIdx = i;
         m_cardsSelected = CardSelected::TwoCards;
         m_resolveCardsAtMs = SDL_GetTicks() + m_revealDelayMs;
     }
-    return 0;
+    return GameCommand::None;
 }
