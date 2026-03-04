@@ -67,6 +67,7 @@ if (EMSCRIPTEN)
     message(STATUS "Building for Web (Emscripten)")
 
     set(CMAKE_EXECUTABLE_SUFFIX ".html")
+    set_target_properties(MemorySDL PROPERTIES OUTPUT_NAME "index")
 
     target_link_options(MemorySDL PRIVATE
         "-O3"
