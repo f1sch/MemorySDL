@@ -68,13 +68,9 @@ SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
     if (event->type == SDL_EVENT_MOUSE_BUTTON_DOWN) 
     {
         //SDL_Log("Current Mouse position is: (%f, %f)", event->button.x, event->button.y);
-        switch (const auto cmd = g_game->OnMouseDown(event->button.x, event->button.y))
+        switch (g_game->OnMouseDown(event->button.x, event->button.y))
         {
             case Game::GameCommand::Restart:
-                // g_game.reset();
-                // g_game = std::make_unique<Game>(g_window, g_renderer, WINDOW_WIDTH, WINDOW_HEIGHT);
-                // g_game->Init();
-                // g_game->Run();
                 g_game->Restart();
                 g_game->Run();
                 break;

@@ -8,21 +8,23 @@
 class SoundSystem
 {
 public:
-    enum class SoundId { Background, CardFlip };
+    enum class SoundId { None, Background, CardFlip };
 
     SoundSystem();
     ~SoundSystem();
     void Init();
+    void Update();
     void ShutdownSound();
     void PlaySfxSound(SoundId id);
     void LoadSound(SoundId id, const char* path);
-    
-    void LoopSfxSound(SoundId id);
-    void LoopMusic(SoundId id);
+
 
     bool IsInitialised() const;
+    bool IsMusicStarted() const;
 
+    void SetMusicStarted(bool start);
 private:
+    void PlayMusic(SoundId id);
     struct SoundData
     {
         Uint8* wavData;
@@ -33,6 +35,9 @@ private:
 
     SDL_AudioDeviceID m_device;
     SDL_AudioStream* m_musicStream;
+    SoundId m_currentMusic;
+    bool m_musicStarted;
+    bool m_musicPlaying;
     SDL_AudioStream* m_sfxStream;
     SDL_AudioSpec m_deviceSpec;
     

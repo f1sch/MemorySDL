@@ -61,10 +61,10 @@ int Game::Init()
     m_grid->InitGrid(m_windowWidth, m_windowHeight, TEX_WIDTH, TEX_HEIGHT);
 
     m_soundSystem = std::make_unique<SoundSystem>();
-#ifdef __EMSCRIPTEN__
-    // only load on mouse input to start
-#else
     m_soundSystem->Init();
+    // only load on mouse input to start
+#ifdef __EMSCRIPTEN__
+#else
 #endif
 
     // UI
@@ -148,13 +148,24 @@ int Game::Update()
         break;
     }
 
-    m_soundSystem->LoopMusic(SoundSystem::SoundId::Background);
-
+    //m_soundSystem->PlayMusic(SoundSystem::SoundId::Background);
+#ifdef __EMSCRIPTEN__
+    if (m_soundSystem->IsMusicStarted())
+        m_soundSystem->Update();
+#else
+    m_soundSystem->Update();
+#endif
     return result;
 }
 
 Game::GameCommand Game::OnMouseDown(const float x, const float y)
 {
+#ifdef __EMSCRIPTEN__
+    if (!m_soundSystem->IsMusicStarted()) {
+        m_soundSystem->SetMusicStarted(true);
+        m_soundSystem->Update();
+    }
+#endif
     return HitTest(x,y);
 }
 
