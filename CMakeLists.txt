@@ -73,6 +73,6 @@ if (EMSCRIPTEN)
         "-O3"
         "-sALLOW_MEMORY_GROWTH=1"
         "--preload-file" "${CMAKE_SOURCE_DIR}/assets@/assets"
-        #"-sUSE_SDL=3"
+        "--shell-file" "${CMAKE_SOURCE_DIR}/web/index.html"
     )
 endif()
