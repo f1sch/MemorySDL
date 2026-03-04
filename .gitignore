@@ -117,3 +117,4 @@ x86/
 # assets/atlases/*.json
 /test-web-build.ps1
 /build-web.ps1
+/build-win/
