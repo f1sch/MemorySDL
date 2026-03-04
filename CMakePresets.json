@@ -1,0 +1,52 @@
+{
+  "version": 6,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 20,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "base-release",
+      "hidden": true,
+      "generator": "Ninja",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+
+    {
+      "name": "windows-release",
+      "inherits": "base-release",
+      "binaryDir": "build/win"
+    },
+
+    {
+      "name": "linux-release",
+      "inherits": "base-release",
+      "binaryDir": "build/linux"
+    },
+
+    {
+      "name": "web-release",
+      "inherits": "base-release",
+      "binaryDir": "build/web",
+      "toolchainFile": "$env{EMSDK}/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake"
+    }
+  ],
+
+  "buildPresets": [
+    {
+      "name": "build-windows",
+      "configurePreset": "windows-release"
+    },
+    {
+      "name": "build-linux",
+      "configurePreset": "linux-release"
+    },
+    {
+      "name": "build-web",
+      "configurePreset": "web-release"
+    }
+  ]
+}
