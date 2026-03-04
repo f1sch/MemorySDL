@@ -62,25 +62,24 @@ SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
     }
     if (event->type == SDL_EVENT_WINDOW_RESIZED) 
     {
-        // TODO: resize layout for cards
-        g_game->Resize();
+        // TODO: resize layout for cards; give new window size to g_game
+        //g_game->Resize(width, height);
     }
     if (event->type == SDL_EVENT_MOUSE_BUTTON_DOWN) 
     {
-        SDL_Log("Current Mouse position is: (%f, %f)", event->button.x, event->button.y);
-
-        int result = g_game->HitTest(event->button.x, event->button.y);
-        if (result < 0)
-            g_shouldQuit = true;
-
-        if (result > 0)
+        //SDL_Log("Current Mouse position is: (%f, %f)", event->button.x, event->button.y);
+        switch (g_game->OnMouseDown(event->button.x, event->button.y))
         {
-            g_game.reset();
-            g_game = std::make_unique<Game>(g_window, g_renderer, WINDOW_WIDTH, WINDOW_HEIGHT);
-            g_game->Init();
-            g_game->Run();
+            case Game::GameCommand::Restart:
+                g_game->Restart();
+                g_game->Run();
+                break;
+            case Game::GameCommand::Quit:
+                g_shouldQuit = true;
+                break;
+            default:
+                break;
         }
-        
     }
     return SDL_APP_CONTINUE;  // carry on with the program!
 }

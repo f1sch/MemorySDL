@@ -115,3 +115,5 @@ x86/
 # ------------------------------------------------------------
 # assets/atlases/*.png
 # assets/atlases/*.json
+/test-web-build.ps1
+/build-web.ps1

@@ -1,8 +1,6 @@
 name: CMake Build
 
 on:
-  push:
-    branches: [ main, develop ]
   pull_request:
     branches: [ main, develop ]
 
@@ -68,3 +66,29 @@ jobs:
         with:
             name: linux-build
             path: build
+
+
+  build-web:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup Emscripten
+        uses: mymindstorm/setup-emsdk@v14
+        with:
+          version: latest
+
+      - name: Configure (Web)
+        run: cmake --preset web-release
+
+      - name: Build (Web)
+        run: cmake --build --preset build-web
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-build
+          path: build/web
