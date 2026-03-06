@@ -23,12 +23,13 @@ constexpr auto WINDOW_WIDTH = 640;
 constexpr auto WINDOW_HEIGHT = 480;
 
 bool g_shouldQuit = false;
+constexpr auto GAME_VERSION = "0.2";
 std::unique_ptr<Game> g_game = nullptr;
 
 // This function runs once at startup.
 SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
 {
-    SDL_SetAppMetadata("Spooky Memory", "0.1", "com.example.spookymemory");
+    SDL_SetAppMetadata("Spooky Memory", GAME_VERSION, "com.example.spookymemory");
 
 
     if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO)) 
@@ -38,7 +39,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     }
 
     // NOTE: Disallow window resizing for now. Develop on a fixed size window and add resizing later. 
-    if (!SDL_CreateWindowAndRenderer("Memory", WINDOW_WIDTH, WINDOW_HEIGHT, 0 /*SDL_WINDOW_RESIZABLE*/, &g_window, &g_renderer)) 
+    if (!SDL_CreateWindowAndRenderer("Memory", WINDOW_WIDTH, WINDOW_HEIGHT, 0 /*SDL_WINDOW_BORDERLESS | SDL_WINDOW_RESIZABLE*/, &g_window, &g_renderer))
     {
         SDL_Log("Couldn't create window/renderer: %s", SDL_GetError());
         return SDL_APP_FAILURE;
