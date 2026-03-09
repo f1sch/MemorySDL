@@ -12,6 +12,12 @@ void StartScene::HandleEvent(const SDL_Event &event)
 {
     if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN)
     {
+#ifdef __EMSCRIPTEN__
+        if (!m_context.soundSystem->IsMusicStarted()) {
+            m_context.soundSystem->SetMusicStarted(true);
+            m_context.soundSystem->Update();
+        }
+#endif
         const SDL_FPoint &p {event.button.x, event.button.y};
 
         if (SDL_PointInRectFloat(&p, &m_uiPlayButtonRect))

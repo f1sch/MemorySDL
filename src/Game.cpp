@@ -109,20 +109,6 @@ int Game::Update() const
     return 0;
 }
 
-// NOTE: irrelevant with SceneManager
-// TODO: webasm case has to be refactored
-Game::GameCommand Game::OnMouseDown(const float x, const float y)
-{
-#ifdef __EMSCRIPTEN__
-    if (!m_soundSystem->IsMusicStarted()) {
-        m_soundSystem->SetMusicStarted(true);
-        m_soundSystem->Update();
-    }
-#endif
-    //return HitTest(x,y);
-    return GameCommand::None;
-}
-
 // NOTE: currently not used. Window is fixed size
 void Game::Resize()
 {

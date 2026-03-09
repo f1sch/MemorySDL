@@ -17,8 +17,6 @@ class SoundSystem;
 class Game
 {
 public:
-	enum class GameCommand { None, Quit, Restart };
-
 	Game(SDL_Window* window, SDL_Renderer* renderer, int width, int height);
 	~Game();
 
@@ -28,7 +26,6 @@ public:
 	void Resize();
 
 	void HandleEvent(const SDL_Event& event) const;
-	GameCommand OnMouseDown(float x, float y);
 
 private:
 	// Window
