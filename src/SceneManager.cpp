@@ -5,6 +5,11 @@ void SceneManager::RequestSceneChange(std::unique_ptr<Scene> scene)
     m_currentScene = std::move(scene);
 }
 
+void SceneManager::RequestQuit()
+{
+    m_quitRequested = true;
+}
+
 void SceneManager::HandleEvent(const SDL_Event &event) const
 {
     if (m_currentScene)

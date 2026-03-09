@@ -7,8 +7,6 @@
 #include "StartScene.h"
 #include "SoundSystem.h"
 
-#include <SDL3/SDL_pixels.h>
-#include <SDL3/SDL_rect.h>
 #include <SDL3/SDL_render.h>
 #include <SDL3/SDL_stdinc.h>
 #include <SDL3/SDL_timer.h>
@@ -88,14 +86,15 @@ void Game::ShutdownGame() const
 }
 
 // TODO: Add Scene management
-int Game::Update()
+int Game::Update() const
 {
     const Uint64 now = SDL_GetTicks();
     // we'll have some textures move around over a few seconds.
     //const float direction = ((now % 2000) >= 1000) ? 1.0f : -1.0f;
     //const float scale = ((float)(((int)(now % 1000)) - 500) / 500.0f) * direction;
-    // TODO: 1. check return value (ends the game loop in main)
-    int result = 0;
+
+    if (m_sceneManager->ShouldQuit())
+        return -1;
 
     m_sceneManager->Update(static_cast<float>(now));
     m_sceneManager->Render(m_renderer);
@@ -107,10 +106,11 @@ int Game::Update()
 #else
     m_soundSystem->Update();
 #endif
-    return result;
+    return 0;
 }
 
 // NOTE: irrelevant with SceneManager
+// TODO: webasm case has to be refactored
 Game::GameCommand Game::OnMouseDown(const float x, const float y)
 {
 #ifdef __EMSCRIPTEN__
@@ -120,44 +120,6 @@ Game::GameCommand Game::OnMouseDown(const float x, const float y)
     }
 #endif
     //return HitTest(x,y);
-    return GameCommand::None;
-}
-
-// TODO: move to EndScene::Render()
-void Game::UpdateEndScreen() const
-{
-    // Draw End screen
-    SDL_SetRenderDrawColor(m_renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
-    SDL_RenderClear(m_renderer);
-    SDL_SetRenderDrawColor(m_renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
-
-    // Ending title
-    SDL_SetRenderScale(m_renderer, 5.f, 5.f);
-    const auto text = "GAME ENDED!";
-    const float middle = ((static_cast<float>(m_windowWidth) / 2.0f) / 5.f) - (static_cast<float>(SDL_strlen(text)) * 5.f) / 1.25f;
-    SDL_RenderDebugText(m_renderer, middle, middle, text);
-    SDL_SetRenderScale(m_renderer, 1.0f, 1.0f);
-
-    // PlayButton
-    SDL_Texture* play = m_assetManager->GetTexture("UI_PlayButton");
-    //SDL_RenderTexture(m_renderer, play, nullptr, &m_uiPlayButtonRect);
-
-    // QuitButton
-    SDL_Texture* quit = m_assetManager->GetTexture("UI_QuitButton");
-    //SDL_RenderTexture(m_renderer, quit, nullptr, &m_uiQuitButtonRect);
-
-    SDL_RenderPresent(m_renderer);
-}
-
-// TODO: move to EndScene::HandleEvent()
-Game::GameCommand Game::HandleEndingState(const SDL_FPoint &p) const
-{
-    // if (SDL_PointInRectFloat(&p, &m_uiPlayButtonRect))
-    //     return GameCommand::Restart;
-    //
-    // if (SDL_PointInRectFloat(&p, &m_uiQuitButtonRect))
-    //     return GameCommand::Quit;
-
     return GameCommand::None;
 }
 

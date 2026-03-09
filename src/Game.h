@@ -24,18 +24,13 @@ public:
 
 	int Init();
 	void ShutdownGame() const;
-	int Update();
+	[[nodiscard]] int Update() const;
 	void Resize();
 
 	void HandleEvent(const SDL_Event& event) const;
 	GameCommand OnMouseDown(float x, float y);
 
 private:
-	void UpdateEndScreen() const;
-
-	[[nodiscard]] GameCommand HandleEndingState(const SDL_FPoint& p) const;
-
-
 	// Window
 	SDL_Window* m_window;
 	SDL_Renderer* m_renderer;

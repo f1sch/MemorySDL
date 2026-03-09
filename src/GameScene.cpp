@@ -1,6 +1,7 @@
 #include "GameScene.h"
 
 #include "Card.h"
+#include "EndScene.h"
 
 #include "SDL3/SDL_timer.h"
 
@@ -10,7 +11,7 @@ void GameScene::HandleEvent(const SDL_Event &event)
     {
         // HitTests are locked if two Cards are currently faceUp
         if (m_cardsSelected == CardSelected::TwoCards)
-            return;// GameCommand::None;
+            return;
 
         const SDL_FPoint p = { event.button.x,event.button.y };
 
@@ -31,7 +32,7 @@ void GameScene::HandleEvent(const SDL_Event &event)
 
             // Do nothing if the same Card is clicked repeatedly
             if (m_cardsSelected == CardSelected::OneCard && m_firstCardIdx == i)
-                return;// GameCommand::None;
+                return;
 
             m_context.soundSystem->PlaySfxSound(SoundSystem::SoundId::CardFlip);
 
@@ -42,7 +43,7 @@ void GameScene::HandleEvent(const SDL_Event &event)
             {
                 m_firstCardIdx = i;
                 m_cardsSelected = CardSelected::OneCard;
-                return;// GameCommand::None;
+                return;
             }
 
             m_secondCardIdx = i;
@@ -54,12 +55,10 @@ void GameScene::HandleEvent(const SDL_Event &event)
 
 void GameScene::Update(float dt)
 {
-    SDL_SetRenderDrawColor(m_context.renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
-    SDL_RenderClear(m_context.renderer);
-
     if (m_attempts < 1)
     {
-        m_gameState = GameState::Ended; // NOTE: is it better to call a func that sets state?
+        m_gameState = GameState::Ended;
+        m_sceneManager.RequestSceneChange(std::make_unique<EndScene>(m_sceneManager, m_context));
         return;
     }
 
@@ -100,6 +99,9 @@ void GameScene::Update(float dt)
 
 void GameScene::Render(SDL_Renderer *renderer)
 {
+    SDL_SetRenderDrawColor(m_context.renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
+    SDL_RenderClear(m_context.renderer);
+
     // Iterate over GridLayout and render
     SDL_Texture* cardBack = m_context.assetManager->GetTexture("Card_Back");
     SDL_Texture* cardRender{};
@@ -116,7 +118,7 @@ void GameScene::Render(SDL_Renderer *renderer)
 
         SDL_RenderTexture(m_context.renderer, cardRender, nullptr, &rect);
     }
-    //RenderUI();
+
     // Render Attempts
     const auto tex = m_context.assetManager->GetTexture("UI_Heart");
     for (int i = 0; i < m_attempts; ++i)

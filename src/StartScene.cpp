@@ -18,9 +18,7 @@ void StartScene::HandleEvent(const SDL_Event &event)
             m_sceneManager.RequestSceneChange(std::make_unique<GameScene>(m_sceneManager, m_context));
 
         else if (SDL_PointInRectFloat(&p, &m_uiQuitButtonRect))
-        {
-            // TODO: quit the game
-        }
+            m_sceneManager.RequestQuit();
     }
 }
 
