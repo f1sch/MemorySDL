@@ -8,7 +8,7 @@ class StartScene : public Scene
 {
 public:
     explicit StartScene(SceneManager &manager, GameContext& context)
-        : Scene(context), m_sceneManager(manager), m_context(context)
+        : Scene(context), m_sceneManager(manager)
     {
         m_uiPlayButtonRect.x = static_cast<float>(m_context.windowWidth) * 0.15f;
         m_uiPlayButtonRect.y = static_cast<float>(m_context.windowHeight) * 0.75f;
@@ -27,7 +27,6 @@ public:
 
 private:
     SceneManager &m_sceneManager;
-    GameContext& m_context;
 
     // UI
     const char* m_uiPlayButtonText = "PLAY";

@@ -71,16 +71,6 @@ int Game::Init()
 #endif
 
     // UI
-    // NOTE: moved to StartScene::StartScene()
-    //m_uiPlayButtonRect.x = static_cast<float>(m_windowWidth) * 0.15f;
-    //m_uiPlayButtonRect.y = static_cast<float>(m_windowHeight) * 0.75f;
-    //m_uiPlayButtonRect.w = static_cast<float>(TEX_WIDTH);
-    //m_uiPlayButtonRect.h = static_cast<float>(TEX_HEIGHT);
-    // NOTE: moved to StartScene::StartScene()
-    // m_uiQuitButtonRect.x = static_cast<float>(m_windowWidth) * 0.75f;
-    // m_uiQuitButtonRect.y = static_cast<float>(m_windowHeight) * 0.75f;
-    // m_uiQuitButtonRect.w = static_cast<float>(TEX_WIDTH);
-    // m_uiQuitButtonRect.h = static_cast<float>(TEX_HEIGHT);
     // TODO: move to GameScene::GameScene()
     constexpr auto size = static_cast<size_t>(MAX_ATTEMPTS);
     m_uiHeartRects.resize(size);
@@ -261,45 +251,7 @@ void Game::UpdateEndScreen() const
 
     SDL_RenderPresent(m_renderer);
 }
-// NOTE: moved to StartScene::Render()
-// void Game::UpdateStartScreen() const
-// {
-//     // Draw Start screen
-//     SDL_SetRenderDrawColor(m_renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
-//     SDL_RenderClear(m_renderer);
-//     SDL_SetRenderDrawColor(m_renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
-//
-//     // Starting title
-//     SDL_SetRenderScale(m_renderer, 4.f, 4.f);
-//     const auto text = "MEMORIA HORRIFICA";
-//     const float middle = ((static_cast<float>(m_windowWidth) / 2.0f) / 5.f) - (static_cast<float>(SDL_strlen(text)) * 5.f) / 1.55f;
-//     SDL_RenderDebugText(m_renderer, middle, 25.0f, text);
-//     SDL_SetRenderScale(m_renderer, 1.0f, 1.0f);
-//
-//     // PlayButton
-//     SDL_Texture* play = m_assetManager->GetTexture("UI_PlayButton");
-//     SDL_RenderTexture(m_renderer, play, nullptr, &m_uiPlayButtonRect);
-//
-//     // QuitButton
-//     SDL_Texture* quit = m_assetManager->GetTexture("UI_QuitButton");
-//     SDL_RenderTexture(m_renderer, quit, nullptr, &m_uiQuitButtonRect);
-//
-//     SDL_RenderPresent(m_renderer);
-// }
 
-// NOTE: moved to StartingScene::HandleEvent()
-Game::GameCommand Game::HandleStartingState(const SDL_FPoint &p)
-{
-    if (SDL_PointInRectFloat(&p, &m_uiPlayButtonRect))
-    {
-        Run();
-        return GameCommand::None;
-    }
-    if (SDL_PointInRectFloat(&p, &m_uiQuitButtonRect))
-        return GameCommand::Quit;
-
-    return GameCommand::None;
-}
 // TODO: move to EndScene::HandleEvent()
 Game::GameCommand Game::HandleEndingState(const SDL_FPoint &p) const
 {
@@ -364,18 +316,20 @@ Game::GameCommand Game::HitTest(const float x, const float y)
         return GameCommand::None;
 
     const SDL_FPoint p = { x,y };
-    switch (m_gameState)
-    {
-        case GameState::Starting:
-            return HandleStartingState(p);
-        case GameState::Running:
-            break;
-        case GameState::Ended:
-            return HandleEndingState(p);
-        default:
-            return GameCommand::None;
-    }
+    // TODO: checking GameState is obsolete with SceneManager
+    // switch (m_gameState)
+    // {
+    //     case GameState::Starting:
+    //         return HandleStartingState(p);
+    //     case GameState::Running:
+    //         break;
+    //     case GameState::Ended:
+    //         return HandleEndingState(p);
+    //     default:
+    //         return GameCommand::None;
+    // }
 
+    // TODO: that is GameScene logic
     const int size = static_cast<int>(m_grid->GetSize());
     for (int i = 0; i < size; ++i)
     {
