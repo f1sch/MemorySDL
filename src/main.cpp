@@ -48,7 +48,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     
     g_game = std::make_unique<Game>(g_window, g_renderer, WINDOW_WIDTH, WINDOW_HEIGHT);
     g_game->Init();
-    g_game->Start();
+    //g_game->Start();
 
     return SDL_APP_CONTINUE;  // carry on with the program!
 }
@@ -66,31 +66,21 @@ SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
         // TODO: resize layout for cards; give new window size to g_game
         //g_game->Resize(width, height);
     }
-    if (event->type == SDL_EVENT_MOUSE_BUTTON_DOWN) 
+    else
     {
-        //SDL_Log("Current Mouse position is: (%f, %f)", event->button.x, event->button.y);
-        switch (g_game->OnMouseDown(event->button.x, event->button.y))
-        {
-            case Game::GameCommand::Restart:
-                g_game->Restart();
-                g_game->Run();
-                break;
-            case Game::GameCommand::Quit:
-                g_shouldQuit = true;
-                break;
-            default:
-                break;
-        }
+        g_game->HandleEvent(*event);
     }
     return SDL_APP_CONTINUE;  // carry on with the program!
 }
 
 SDL_AppResult SDL_AppIterate(void* appstate)
 {
-    if (g_shouldQuit == true)
+    //if (g_shouldQuit == true)
+    //    return SDL_APP_SUCCESS;
+    // TODO: just return from the loop
+    if (g_game->Update() < 0)
         return SDL_APP_SUCCESS;
-
-    g_game->Update();
+    //g_game->Update();
     
     return SDL_APP_CONTINUE;  // carry on with the program!
 }

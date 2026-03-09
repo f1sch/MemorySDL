@@ -61,7 +61,10 @@ SDL_Texture* AssetManager::GetTexture(const std::string& key) const
     const auto it = m_textures.find(key);
     
     if (it == m_textures.end())
+    {
         SDL_Log("Texture not found");
-    
+        return nullptr;
+    }
+
     return it->second;
 }

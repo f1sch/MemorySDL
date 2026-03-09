@@ -1,4 +1,5 @@
 #pragma once
+#include "GameContext.h"
 
 #include <SDL3/SDL_rect.h>
 #include <SDL3/SDL_render.h>
@@ -10,6 +11,7 @@
 
 class AssetManager;
 class GridLayout;
+class SceneManager;
 class SoundSystem;
 
 class Game
@@ -28,6 +30,7 @@ public:
 	int Update();
 	void Resize();
 
+	void HandleEvent(const SDL_Event& event) const;
 	GameCommand OnMouseDown(float x, float y);
 private:
 	enum class CardSelected { NoCard, OneCard, TwoCards };
@@ -55,6 +58,9 @@ private:
 	std::unique_ptr<AssetManager> m_assetManager;
 	std::unique_ptr<GridLayout> m_grid;
 	std::unique_ptr<SoundSystem> m_soundSystem;
+	std::unique_ptr<SceneManager> m_sceneManager;
+
+	GameContext m_gameContext;
 
 	// UI
 	const char* m_uiPlayButtonText = "PLAY";
@@ -69,7 +75,6 @@ private:
 	// State
 	enum class GameState { Running, Ended, Paused, Starting };
 	GameState m_gameState;
-	Scene m_scene; // TODO: Game::Scene und Game::GameState do the same thing?
 
 	size_t m_numOfCardsMatched = 0;
 	CardSelected m_cardsSelected;

@@ -4,6 +4,8 @@
 #include "Card.h"
 #include "Game.h"
 #include "GridLayout.h"
+#include "SceneManager.h"
+#include "StartScene.h"
 #include "SoundSystem.h"
 
 #include <SDL3/SDL_pixels.h>
@@ -24,9 +26,10 @@ constexpr auto MAX_ATTEMPTS = 5;
 
 Game::Game(SDL_Window* window, SDL_Renderer* renderer, const int width, const int height)
     : m_window(window), m_renderer(renderer),
-      m_windowWidth(width), m_windowHeight(height),
-      m_gameState(GameState::Paused), m_scene(),
-      m_cardsSelected(CardSelected::NoCard), m_attempts(MAX_ATTEMPTS) {
+      m_windowWidth(width), m_windowHeight(height), m_gameContext(nullptr, nullptr, 0, 0, 0, 0),
+      m_gameState(GameState::Paused),
+      m_cardsSelected(CardSelected::NoCard), m_attempts(MAX_ATTEMPTS)
+{
 }
 
 Game::~Game()
@@ -68,16 +71,17 @@ int Game::Init()
 #endif
 
     // UI
-    m_uiPlayButtonRect.x = static_cast<float>(m_windowWidth) * 0.15f;
-    m_uiPlayButtonRect.y = static_cast<float>(m_windowHeight) * 0.75f;
-    m_uiPlayButtonRect.w = static_cast<float>(TEX_WIDTH);
-    m_uiPlayButtonRect.h = static_cast<float>(TEX_HEIGHT);
-
-    m_uiQuitButtonRect.x = static_cast<float>(m_windowWidth) * 0.75f;
-    m_uiQuitButtonRect.y = static_cast<float>(m_windowHeight) * 0.75f;
-    m_uiQuitButtonRect.w = static_cast<float>(TEX_WIDTH);
-    m_uiQuitButtonRect.h = static_cast<float>(TEX_HEIGHT);
-
+    // NOTE: moved to StartScene::StartScene()
+    //m_uiPlayButtonRect.x = static_cast<float>(m_windowWidth) * 0.15f;
+    //m_uiPlayButtonRect.y = static_cast<float>(m_windowHeight) * 0.75f;
+    //m_uiPlayButtonRect.w = static_cast<float>(TEX_WIDTH);
+    //m_uiPlayButtonRect.h = static_cast<float>(TEX_HEIGHT);
+    // NOTE: moved to StartScene::StartScene()
+    // m_uiQuitButtonRect.x = static_cast<float>(m_windowWidth) * 0.75f;
+    // m_uiQuitButtonRect.y = static_cast<float>(m_windowHeight) * 0.75f;
+    // m_uiQuitButtonRect.w = static_cast<float>(TEX_WIDTH);
+    // m_uiQuitButtonRect.h = static_cast<float>(TEX_HEIGHT);
+    // TODO: move to GameScene::GameScene()
     constexpr auto size = static_cast<size_t>(MAX_ATTEMPTS);
     m_uiHeartRects.resize(size);
     for (size_t i = 0; i < size; ++i) {
@@ -86,6 +90,18 @@ int Game::Init()
         m_uiHeartRects[i].w = static_cast<float>(TEX_WIDTH);
         m_uiHeartRects[i].h = static_cast<float>(TEX_HEIGHT);
     }
+
+    m_gameContext.renderer = m_renderer;
+    m_gameContext.assetManager = m_assetManager.get();
+    m_gameContext.windowWidth = m_windowWidth;
+    m_gameContext.windowHeight = m_windowHeight;
+    m_gameContext.texWidth = TEX_WIDTH;
+    m_gameContext.texHeight = TEX_HEIGHT;
+
+    m_sceneManager = std::make_unique<SceneManager>();
+    m_sceneManager->ChangeScene(std::make_unique<StartScene>(
+        *m_sceneManager, m_gameContext)
+    );
 
     return 0;
 }
@@ -121,32 +137,37 @@ void Game::ShutdownGame() const
     m_soundSystem->ShutdownSound();
 }
 
+// TODO: Add Scene management
 int Game::Update()
 {
-    //const Uint64 now = SDL_GetTicks();
+    const Uint64 now = SDL_GetTicks();
     // we'll have some textures move around over a few seconds.
     //const float direction = ((now % 2000) >= 1000) ? 1.0f : -1.0f;
     //const float scale = ((float)(((int)(now % 1000)) - 500) / 500.0f) * direction;
-
+    // TODO: 1. check return value (ends the game loop in main)
     int result = 0;
-    switch (m_gameState)
-    {
-    case GameState::Running:
-        UpdateGameplay();
-        Render();
-        break;
-    case GameState::Ended:
-        UpdateEndScreen();
-        result = -1;
-        break;
-    case GameState::Paused:
-        break;
-    case GameState::Starting:
-        UpdateStartScreen();
-        break;
-    default:
-        break;
-    }
+    // switch (m_gameState)
+    // {
+    // case GameState::Running:
+    //     UpdateGameplay();
+    //     Render();
+    //     break;
+    // case GameState::Ended:
+    //     UpdateEndScreen();
+    //     result = -1;
+    //     break;
+    // case GameState::Paused:
+    //     break;
+    // case GameState::Starting:
+    //     UpdateStartScreen();
+    //     break;
+    // default:
+    //     break;
+    // }
+
+    UpdateGameplay();
+    m_sceneManager->Update(static_cast<float>(now));
+    m_sceneManager->Render(m_renderer);
 
     //m_soundSystem->PlayMusic(SoundSystem::SoundId::Background);
 #ifdef __EMSCRIPTEN__
@@ -158,6 +179,7 @@ int Game::Update()
     return result;
 }
 
+// NOTE: irrelevant with SceneManager
 Game::GameCommand Game::OnMouseDown(const float x, const float y)
 {
 #ifdef __EMSCRIPTEN__
@@ -214,7 +236,7 @@ void Game::UpdateGameplay()
         default: ;
     }
 }
-
+// TODO: move to EndScene::Render()
 void Game::UpdateEndScreen() const
 {
     // Draw End screen
@@ -239,32 +261,33 @@ void Game::UpdateEndScreen() const
 
     SDL_RenderPresent(m_renderer);
 }
+// NOTE: moved to StartScene::Render()
+// void Game::UpdateStartScreen() const
+// {
+//     // Draw Start screen
+//     SDL_SetRenderDrawColor(m_renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
+//     SDL_RenderClear(m_renderer);
+//     SDL_SetRenderDrawColor(m_renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
+//
+//     // Starting title
+//     SDL_SetRenderScale(m_renderer, 4.f, 4.f);
+//     const auto text = "MEMORIA HORRIFICA";
+//     const float middle = ((static_cast<float>(m_windowWidth) / 2.0f) / 5.f) - (static_cast<float>(SDL_strlen(text)) * 5.f) / 1.55f;
+//     SDL_RenderDebugText(m_renderer, middle, 25.0f, text);
+//     SDL_SetRenderScale(m_renderer, 1.0f, 1.0f);
+//
+//     // PlayButton
+//     SDL_Texture* play = m_assetManager->GetTexture("UI_PlayButton");
+//     SDL_RenderTexture(m_renderer, play, nullptr, &m_uiPlayButtonRect);
+//
+//     // QuitButton
+//     SDL_Texture* quit = m_assetManager->GetTexture("UI_QuitButton");
+//     SDL_RenderTexture(m_renderer, quit, nullptr, &m_uiQuitButtonRect);
+//
+//     SDL_RenderPresent(m_renderer);
+// }
 
-void Game::UpdateStartScreen() const
-{
-    // Draw Start screen
-    SDL_SetRenderDrawColor(m_renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
-    SDL_RenderClear(m_renderer);
-    SDL_SetRenderDrawColor(m_renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
-
-    // Starting title
-    SDL_SetRenderScale(m_renderer, 4.f, 4.f);
-    const auto text = "MEMORIA HORRIFICA";
-    const float middle = ((static_cast<float>(m_windowWidth) / 2.0f) / 5.f) - (static_cast<float>(SDL_strlen(text)) * 5.f) / 1.55f;
-    SDL_RenderDebugText(m_renderer, middle, 25.0f, text);
-    SDL_SetRenderScale(m_renderer, 1.0f, 1.0f);
-
-    // PlayButton
-    SDL_Texture* play = m_assetManager->GetTexture("UI_PlayButton");
-    SDL_RenderTexture(m_renderer, play, nullptr, &m_uiPlayButtonRect);
-
-    // QuitButton
-    SDL_Texture* quit = m_assetManager->GetTexture("UI_QuitButton");
-    SDL_RenderTexture(m_renderer, quit, nullptr, &m_uiQuitButtonRect);
-
-    SDL_RenderPresent(m_renderer);
-}
-
+// NOTE: moved to StartingScene::HandleEvent()
 Game::GameCommand Game::HandleStartingState(const SDL_FPoint &p)
 {
     if (SDL_PointInRectFloat(&p, &m_uiPlayButtonRect))
@@ -277,7 +300,7 @@ Game::GameCommand Game::HandleStartingState(const SDL_FPoint &p)
 
     return GameCommand::None;
 }
-
+// TODO: move to EndScene::HandleEvent()
 Game::GameCommand Game::HandleEndingState(const SDL_FPoint &p) const
 {
     if (SDL_PointInRectFloat(&p, &m_uiPlayButtonRect))
@@ -288,7 +311,7 @@ Game::GameCommand Game::HandleEndingState(const SDL_FPoint &p) const
 
     return GameCommand::None;
 }
-
+// TODO: this renders the scene and UI of GameScene. Move to GameScene
 void Game::Render() const
 {
     // Iterate over GridLayout and render
@@ -310,7 +333,7 @@ void Game::Render() const
     RenderUI();
     SDL_RenderPresent(m_renderer);
 }
-
+// TODO: move to UI system or GameScene
 void Game::RenderUI() const
 {
     // Render Attempts
@@ -321,13 +344,19 @@ void Game::RenderUI() const
     }
     // TODO: Render Time
 }
-
+// NOTE: currently not used. Window is fixed size
 void Game::Resize()
 {
     SDL_GetWindowSizeInPixels(m_window, &m_windowWidth, &m_windowHeight);
     m_grid->InitGrid(m_windowWidth, m_windowHeight, TEX_WIDTH, TEX_HEIGHT);
 }
 
+void Game::HandleEvent(const SDL_Event &event) const
+{
+    m_sceneManager->HandleEvent(event);
+}
+
+// TODO: this function does more than one thing
 Game::GameCommand Game::HitTest(const float x, const float y)
 {
     // HitTests are locked if two Cards are currently faceUp
