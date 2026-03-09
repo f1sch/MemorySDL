@@ -1,41 +1,33 @@
 #include "SceneManager.h"
 
-void SceneManager::ChangeScene(std::unique_ptr<Scene> newScene)
+void SceneManager::RequestSceneChange(std::unique_ptr<Scene> scene)
 {
-    if (m_currentScene)
-    {
-        m_currentScene->OnExit();
-    }
-
-    m_currentScene = std::move(newScene);
-
-    if (m_currentScene)
-    {
-        m_currentScene->OnEnter();
-    }
+    m_currentScene = std::move(scene);
 }
 
 void SceneManager::HandleEvent(const SDL_Event &event) const
 {
     if (m_currentScene)
-    {
         m_currentScene->HandleEvent(event);
-    }
 }
 
-void SceneManager::Update(const float dt) const
+void SceneManager::Update(const float dt)
 {
-    if (m_currentScene)
+    if (m_nextScene)
     {
-        m_currentScene->Update(dt);
+        if (m_currentScene)
+            m_currentScene->OnExit();
+
+        m_currentScene = std::move(m_nextScene);
+        m_currentScene->OnEnter();
     }
+    if (m_currentScene)
+        m_currentScene->Update(dt);
 }
 
 void SceneManager::Render(SDL_Renderer *renderer) const
 {
     if (m_currentScene)
-    {
         m_currentScene->Render(renderer);
-    }
 }
 

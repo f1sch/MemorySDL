@@ -23,30 +23,18 @@ public:
 	~Game();
 
 	int Init();
-	void Start();
-	void Restart();
-	void Run();
 	void ShutdownGame() const;
 	int Update();
 	void Resize();
 
 	void HandleEvent(const SDL_Event& event) const;
 	GameCommand OnMouseDown(float x, float y);
+
 private:
-	enum class CardSelected { NoCard, OneCard, TwoCards };
-	enum class Scene { Title, Game, End };
-
-	void UpdateGameplay();
 	void UpdateEndScreen() const;
-	void UpdateStartScreen() const;
 
-	GameCommand HandleStartingState(const SDL_FPoint& p);
 	[[nodiscard]] GameCommand HandleEndingState(const SDL_FPoint& p) const;
 
-	void Render() const;
-	void RenderUI() const;
-
-	GameCommand HitTest(float x, float y);
 
 	// Window
 	SDL_Window* m_window;
@@ -61,29 +49,5 @@ private:
 	std::unique_ptr<SceneManager> m_sceneManager;
 
 	GameContext m_gameContext;
-
-	// UI
-	const char* m_uiPlayButtonText = "PLAY";
-	const char* m_uiQuitButtonText = "QUIT";
-	SDL_FRect m_uiPlayButtonRect{};
-	SDL_FRect m_uiQuitButtonRect{};
-	bool uiPlayPressed = false;
-	bool uiQuitPressed = false;
-
-	std::vector<SDL_FRect> m_uiHeartRects{};
-
-	// State
-	enum class GameState { Running, Ended, Paused, Starting };
-	GameState m_gameState;
-
-	size_t m_numOfCardsMatched = 0;
-	CardSelected m_cardsSelected;
-	int m_firstCardIdx = -1;
-	int m_secondCardIdx = -1;
-
-	Uint64 m_resolveCardsAtMs = 0;
-	static constexpr Uint64 m_revealDelayMs = 800;
-
-	int m_attempts;
 };
 

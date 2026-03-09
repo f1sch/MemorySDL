@@ -15,7 +15,7 @@ void StartScene::HandleEvent(const SDL_Event &event)
         const SDL_FPoint &p {event.button.x, event.button.y};
 
         if (SDL_PointInRectFloat(&p, &m_uiPlayButtonRect))
-            m_sceneManager.ChangeScene(std::make_unique<GameScene>(m_sceneManager, m_context));
+            m_sceneManager.RequestSceneChange(std::make_unique<GameScene>(m_sceneManager, m_context));
 
         else if (SDL_PointInRectFloat(&p, &m_uiQuitButtonRect))
         {
