@@ -1,13 +1,12 @@
-#ifndef MEMORYSDL_STARTSCENE_H
-#define MEMORYSDL_STARTSCENE_H
-#include "Scene.h"
+#ifndef MEMORYSDL_ENDSCENE_H
+#define MEMORYSDL_ENDSCENE_H
+#include "scenes/Scene.h"
+#include "scenes/SceneManager.h"
 
-class SceneManager;
-
-class StartScene : public Scene
+class EndScene : public Scene
 {
 public:
-    explicit StartScene(SceneManager &manager, GameContext& context)
+    explicit EndScene(SceneManager &manager, GameContext &context)
         : Scene(context), m_sceneManager(manager)
     {
         m_uiPlayButtonRect.x = static_cast<float>(m_context.windowWidth) * 0.15f;
@@ -22,7 +21,7 @@ public:
     }
 
     void HandleEvent(const SDL_Event &event) override;
-    void Update(float dt) override {};
+    void Update(float dt) override;
     void Render(SDL_Renderer *renderer) override;
 
 private:
@@ -37,4 +36,4 @@ private:
     bool uiQuitPressed = false;
 };
 
-#endif //MEMORYSDL_STARTSCENE_H
+#endif //MEMORYSDL_ENDSCENE_H

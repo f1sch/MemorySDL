@@ -1,4 +1,4 @@
-#include "SceneManager.h"
+#include "scenes/SceneManager.h"
 
 void SceneManager::RequestSceneChange(std::unique_ptr<Scene> scene)
 {

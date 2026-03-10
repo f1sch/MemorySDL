@@ -1,5 +1,5 @@
 #pragma once
-#include "GameContext.h"
+#include "core/GameContext.h"
 
 #include <SDL3/SDL_render.h>
 #include <SDL3/SDL_video.h>

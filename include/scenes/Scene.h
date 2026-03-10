@@ -1,7 +1,7 @@
 #ifndef MEMORYSDL_SCENE_H
 #define MEMORYSDL_SCENE_H
+#include "core/GameContext.h"
 
-#include "GameContext.h"
 #include "SDL3/SDL_render.h"
 
 class Scene

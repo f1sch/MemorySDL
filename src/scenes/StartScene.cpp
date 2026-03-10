@@ -1,8 +1,8 @@
-#include "StartScene.h"
+#include "scenes/StartScene.h"
 
-#include "GameContext.h"
-#include "GameScene.h"
-#include "SceneManager.h"
+#include "core/GameContext.h"
+#include "scenes/GameScene.h"
+#include "scenes/SceneManager.h"
 
 #include <SDL3/SDL_render.h>
 

@@ -1,7 +1,7 @@
 #ifndef MEMORYSDL_GAMESCENE_H
 #define MEMORYSDL_GAMESCENE_H
-#include "Scene.h"
-#include "SceneManager.h"
+#include "scenes/Scene.h"
+#include "scenes/SceneManager.h"
 
 constexpr auto MAX_ATTEMPTS = 5;
 

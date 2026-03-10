@@ -1,7 +1,7 @@
-#include "GameScene.h"
+#include "scenes/GameScene.h"
 
-#include "Card.h"
-#include "EndScene.h"
+#include "ui/Card.h"
+#include "scenes/EndScene.h"
 
 #include "SDL3/SDL_timer.h"
 

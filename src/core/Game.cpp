@@ -1,11 +1,11 @@
 //#include "pch.h"
+#include "core/Game.h"
 
-#include "AssetManager.h"
-#include "Game.h"
-#include "GridLayout.h"
-#include "SceneManager.h"
-#include "StartScene.h"
-#include "SoundSystem.h"
+#include "ui/GridLayout.h"
+#include "scenes/SceneManager.h"
+#include "scenes/StartScene.h"
+#include "systems/AssetManager.h"
+#include "systems/SoundSystem.h"
 
 #include <SDL3/SDL_render.h>
 #include <SDL3/SDL_stdinc.h>

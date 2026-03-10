@@ -1,6 +1,6 @@
 #ifndef MEMORYSDL_SCENEMANAGER_H
 #define MEMORYSDL_SCENEMANAGER_H
-#include "Scene.h"
+#include "scenes/Scene.h"
 
 #include <memory>
 

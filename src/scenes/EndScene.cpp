@@ -1,6 +1,6 @@
-#include "EndScene.h"
+#include "scenes/EndScene.h"
 
-#include "GameScene.h"
+#include "scenes/GameScene.h"
 
 void EndScene::HandleEvent(const SDL_Event &event)
 {

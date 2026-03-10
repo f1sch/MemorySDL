@@ -1,8 +1,8 @@
 #ifndef MEMORYSDL_GAMECONTEXT_H
 #define MEMORYSDL_GAMECONTEXT_H
-#include "AssetManager.h"
-#include "GridLayout.h"
-#include "SoundSystem.h"
+#include "ui/GridLayout.h"
+#include "systems/AssetManager.h"
+#include "systems/SoundSystem.h"
 
 #include "SDL3/SDL_render.h"
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Card.h"
+#include "ui/Card.h"
 
 #include <SDL3/SDL_rect.h>
 

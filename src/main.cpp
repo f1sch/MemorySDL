@@ -3,7 +3,7 @@
 #define _CRT_SECURE_NO_WARNINGS
 
 //#include "pch.h"
-#include "Game.h"
+#include "core/Game.h"
 
 #include <SDL3/SDL_error.h>
 #include <SDL3/SDL_events.h>
