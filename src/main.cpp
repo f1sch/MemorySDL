@@ -3,7 +3,7 @@
 #define _CRT_SECURE_NO_WARNINGS
 
 //#include "pch.h"
-#include "Game.h"
+#include "core/Game.h"
 
 #include <SDL3/SDL_error.h>
 #include <SDL3/SDL_events.h>
@@ -22,13 +22,13 @@ static SDL_Renderer* g_renderer = NULL;
 constexpr auto WINDOW_WIDTH = 640;
 constexpr auto WINDOW_HEIGHT = 480;
 
-bool g_shouldQuit = false;
+constexpr auto GAME_VERSION = "0.3";
 std::unique_ptr<Game> g_game = nullptr;
 
 // This function runs once at startup.
 SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
 {
-    SDL_SetAppMetadata("Spooky Memory", "0.1", "com.example.spookymemory");
+    SDL_SetAppMetadata("Spooky Memory", GAME_VERSION, "com.example.spookymemory");
 
 
     if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO)) 
@@ -38,7 +38,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     }
 
     // NOTE: Disallow window resizing for now. Develop on a fixed size window and add resizing later. 
-    if (!SDL_CreateWindowAndRenderer("Memory", WINDOW_WIDTH, WINDOW_HEIGHT, 0 /*SDL_WINDOW_RESIZABLE*/, &g_window, &g_renderer)) 
+    if (!SDL_CreateWindowAndRenderer("Memory", WINDOW_WIDTH, WINDOW_HEIGHT, 0 /*SDL_WINDOW_BORDERLESS | SDL_WINDOW_RESIZABLE*/, &g_window, &g_renderer))
     {
         SDL_Log("Couldn't create window/renderer: %s", SDL_GetError());
         return SDL_APP_FAILURE;
@@ -47,7 +47,6 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     
     g_game = std::make_unique<Game>(g_window, g_renderer, WINDOW_WIDTH, WINDOW_HEIGHT);
     g_game->Init();
-    g_game->Start();
 
     return SDL_APP_CONTINUE;  // carry on with the program!
 }
@@ -57,7 +56,6 @@ SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
 {
     if (event->type == SDL_EVENT_QUIT) 
     {
-        g_shouldQuit = true;
         return SDL_APP_SUCCESS;  // end the program, reporting success to the OS.
     }
     if (event->type == SDL_EVENT_WINDOW_RESIZED) 
@@ -65,31 +63,17 @@ SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
         // TODO: resize layout for cards; give new window size to g_game
         //g_game->Resize(width, height);
     }
-    if (event->type == SDL_EVENT_MOUSE_BUTTON_DOWN) 
+    else
     {
-        //SDL_Log("Current Mouse position is: (%f, %f)", event->button.x, event->button.y);
-        switch (g_game->OnMouseDown(event->button.x, event->button.y))
-        {
-            case Game::GameCommand::Restart:
-                g_game->Restart();
-                g_game->Run();
-                break;
-            case Game::GameCommand::Quit:
-                g_shouldQuit = true;
-                break;
-            default:
-                break;
-        }
+        g_game->HandleEvent(*event);
     }
     return SDL_APP_CONTINUE;  // carry on with the program!
 }
 
 SDL_AppResult SDL_AppIterate(void* appstate)
 {
-    if (g_shouldQuit == true)
+    if (g_game->Update() < 0)
         return SDL_APP_SUCCESS;
-
-    g_game->Update();
     
     return SDL_APP_CONTINUE;  // carry on with the program!
 }

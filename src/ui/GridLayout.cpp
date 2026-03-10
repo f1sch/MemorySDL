@@ -1,7 +1,7 @@
 //#include "pch.h"
+#include "ui/GridLayout.h"
 
-#include "Card.h"
-#include "GridLayout.h"
+#include "ui/Card.h"
 
 #include <SDL3/SDL_rect.h>
 

@@ -1,5 +1,5 @@
 //#include "pch.h"
-#include "AssetManager.h"
+#include "systems/AssetManager.h"
 
 #include <SDL3/SDL_error.h>
 #include <SDL3/SDL_filesystem.h>
@@ -61,7 +61,10 @@ SDL_Texture* AssetManager::GetTexture(const std::string& key) const
     const auto it = m_textures.find(key);
     
     if (it == m_textures.end())
+    {
         SDL_Log("Texture not found");
-    
+        return nullptr;
+    }
+
     return it->second;
 }

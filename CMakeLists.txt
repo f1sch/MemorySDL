@@ -47,12 +47,11 @@ if (WIN32)
     )
 endif()
 
-#target_include_directories(MemorySDL PRIVATE
-#    ${CMAKE_SOURCE_DIR}/include
-#)
+target_include_directories(MemorySDL PRIVATE
+    ${CMAKE_SOURCE_DIR}/include
+)
 
 #target_precompile_headers(SpookyMemory PRIVATE include/pch.h)
-
 
 # Copy assets after build
 if (NOT EMSCRIPTEN)
@@ -72,6 +71,8 @@ if (EMSCRIPTEN)
     target_link_options(MemorySDL PRIVATE
         "-O3"
         "-sALLOW_MEMORY_GROWTH=1"
+        "-sINITIAL_MEMORY=64MB"
+        "-sUSE_SDL=3"
         "--preload-file" "${CMAKE_SOURCE_DIR}/assets@/assets"
         "--shell-file" "${CMAKE_SOURCE_DIR}/web/index.html"
     )
