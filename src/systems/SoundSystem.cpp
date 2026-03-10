@@ -1,5 +1,5 @@
 //#include "pch.h"
-#include "SoundSystem.h"
+#include "systems/SoundSystem.h"
 
 #include <SDL3/SDL_audio.h>
 #include <SDL3/SDL_error.h>

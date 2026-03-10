@@ -47,12 +47,11 @@ if (WIN32)
     )
 endif()
 
-#target_include_directories(MemorySDL PRIVATE
-#    ${CMAKE_SOURCE_DIR}/include
-#)
+target_include_directories(MemorySDL PRIVATE
+    ${CMAKE_SOURCE_DIR}/include
+)
 
 #target_precompile_headers(SpookyMemory PRIVATE include/pch.h)
-
 
 # Copy assets after build
 if (NOT EMSCRIPTEN)
