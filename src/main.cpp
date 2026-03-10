@@ -22,7 +22,6 @@ static SDL_Renderer* g_renderer = NULL;
 constexpr auto WINDOW_WIDTH = 640;
 constexpr auto WINDOW_HEIGHT = 480;
 
-bool g_shouldQuit = false;
 constexpr auto GAME_VERSION = "0.2";
 std::unique_ptr<Game> g_game = nullptr;
 
@@ -48,7 +47,6 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
     
     g_game = std::make_unique<Game>(g_window, g_renderer, WINDOW_WIDTH, WINDOW_HEIGHT);
     g_game->Init();
-    //g_game->Start();
 
     return SDL_APP_CONTINUE;  // carry on with the program!
 }
@@ -58,7 +56,6 @@ SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
 {
     if (event->type == SDL_EVENT_QUIT) 
     {
-        g_shouldQuit = true;
         return SDL_APP_SUCCESS;  // end the program, reporting success to the OS.
     }
     if (event->type == SDL_EVENT_WINDOW_RESIZED) 
@@ -75,12 +72,8 @@ SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
 
 SDL_AppResult SDL_AppIterate(void* appstate)
 {
-    //if (g_shouldQuit == true)
-    //    return SDL_APP_SUCCESS;
-    // TODO: just return from the loop
     if (g_game->Update() < 0)
         return SDL_APP_SUCCESS;
-    //g_game->Update();
     
     return SDL_APP_CONTINUE;  // carry on with the program!
 }

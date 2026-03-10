@@ -91,7 +91,10 @@ void GameScene::Update(float dt)
                 m_cardsSelected = CardSelected::NoCard;
 
                 if (m_numOfCardsMatched == m_context.grid->GetSize())
+                {
                     m_gameState = GameState::Ended;
+                    m_sceneManager.RequestSceneChange(std::make_unique<EndScene>(m_sceneManager, m_context));
+                }
             }
         default: ;
     }

@@ -58,10 +58,6 @@ int Game::Init()
 
     m_soundSystem = std::make_unique<SoundSystem>();
     m_soundSystem->Init();
-    // only load on mouse input to start
-#ifdef __EMSCRIPTEN__
-#else
-#endif
 
     m_gameContext.renderer = m_renderer;
     m_gameContext.assetManager = m_assetManager.get();
@@ -85,7 +81,6 @@ void Game::ShutdownGame() const
     m_soundSystem->ShutdownSound();
 }
 
-// TODO: Add Scene management
 int Game::Update() const
 {
     const Uint64 now = SDL_GetTicks();
@@ -99,7 +94,6 @@ int Game::Update() const
     m_sceneManager->Update(static_cast<float>(now));
     m_sceneManager->Render(m_renderer);
 
-    //m_soundSystem->PlayMusic(SoundSystem::SoundId::Background);
 #ifdef __EMSCRIPTEN__
     if (m_soundSystem->IsMusicStarted())
         m_soundSystem->Update();

@@ -1,13 +1,10 @@
 #pragma once
 #include "GameContext.h"
 
-#include <SDL3/SDL_rect.h>
 #include <SDL3/SDL_render.h>
-#include <SDL3/SDL_stdinc.h>
 #include <SDL3/SDL_video.h>
 
 #include <memory>
-#include <vector>
 
 class AssetManager;
 class GridLayout;
