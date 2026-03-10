@@ -22,7 +22,7 @@ static SDL_Renderer* g_renderer = NULL;
 constexpr auto WINDOW_WIDTH = 640;
 constexpr auto WINDOW_HEIGHT = 480;
 
-constexpr auto GAME_VERSION = "0.2";
+constexpr auto GAME_VERSION = "0.3";
 std::unique_ptr<Game> g_game = nullptr;
 
 // This function runs once at startup.
