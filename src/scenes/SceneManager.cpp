@@ -2,7 +2,7 @@
 
 void SceneManager::RequestSceneChange(std::unique_ptr<Scene> scene)
 {
-    m_currentScene = std::move(scene);
+    m_nextScene = std::move(scene);
 }
 
 void SceneManager::RequestQuit()
