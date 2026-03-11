@@ -5,6 +5,21 @@
 
 #include "SDL3/SDL_timer.h"
 
+void GameScene::Init()
+{
+    constexpr auto size = static_cast<size_t>(MAX_ATTEMPTS);
+    m_uiHeartRects.resize(size);
+    for (size_t i = 0; i < size; ++i)
+    {
+        m_uiHeartRects[i].x = (static_cast<float>(m_context.windowWidth) * 0.5f + static_cast<float>(
+                                   m_context.texWidth * i) - static_cast<float>(m_context.texWidth * m_attempts) /
+                               2);
+        m_uiHeartRects[i].y = static_cast<float>(m_context.windowHeight) * 0.001f;
+        m_uiHeartRects[i].w = static_cast<float>(m_context.texWidth);
+        m_uiHeartRects[i].h = static_cast<float>(m_context.texHeight);
+    }
+}
+
 void GameScene::HandleEvent(const SDL_Event &event)
 {
     if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN)
@@ -57,7 +72,6 @@ void GameScene::Update(float dt)
 {
     if (m_attempts < 1)
     {
-        m_gameState = GameState::Ended;
         m_sceneManager.RequestSceneChange(std::make_unique<EndScene>(m_sceneManager, m_context));
         return;
     }
@@ -92,7 +106,6 @@ void GameScene::Update(float dt)
 
                 if (m_numOfCardsMatched == m_context.grid->GetSize())
                 {
-                    m_gameState = GameState::Ended;
                     m_sceneManager.RequestSceneChange(std::make_unique<EndScene>(m_sceneManager, m_context));
                 }
             }
