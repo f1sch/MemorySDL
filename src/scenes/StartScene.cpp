@@ -12,10 +12,10 @@ void StartScene::InitUI()
 {
     SDL_FRect tmpButton
         {
-            m_context.windowWidth * 0.15f,
-            m_context.windowHeight * 0.75f,
-            m_context.texWidth * 0.5f,
-            m_context.texHeight * 0.5f
+            static_cast<float>(m_context.windowWidth) * 0.15f,
+            static_cast<float>(m_context.windowHeight) * 0.75f,
+            static_cast<float>(m_context.texWidth) * 0.5f,
+            static_cast<float>(m_context.texHeight) * 0.5f
         };
     SDL_Texture* play = m_context.assetManager->GetTexture("UI_PlayButton");
     m_ui.push_back(std::make_unique<Button>(
@@ -29,10 +29,10 @@ void StartScene::InitUI()
 
     SDL_FRect tmpButton2 =
     {
-        m_context.windowWidth * 0.75f,
-        m_context.windowHeight * 0.75f,
-        m_context.texWidth * 0.5f,
-        m_context.texHeight * 0.5f
+        static_cast<float>(m_context.windowWidth) * 0.75f,
+        static_cast<float>(m_context.windowHeight) * 0.75f,
+        static_cast<float>(m_context.texWidth) * 0.5f,
+        static_cast<float>(m_context.texHeight) * 0.5f
     };
     SDL_Texture* play2 = m_context.assetManager->GetTexture("UI_QuitButton");
     m_ui.push_back(std::make_unique<Button>(

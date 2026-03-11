@@ -1,22 +1,56 @@
 #include "scenes/EndScene.h"
 
+#include "ui/Button.h"
 #include "scenes/GameScene.h"
+
+#include "memory"
+
+void EndScene::InitUI()
+{
+    SDL_FRect tmpButton
+        {
+            static_cast<float>(m_context.windowWidth) * 0.15f,
+            static_cast<float>(m_context.windowHeight) * 0.75f,
+            static_cast<float>(m_context.texWidth) * 0.5f,
+            static_cast<float>(m_context.texHeight) * 0.5f
+        };
+    SDL_Texture* play = m_context.assetManager->GetTexture("UI_PlayButton");
+    m_ui.push_back(std::make_unique<Button>(
+        tmpButton,
+        play,
+        [this]() {
+            m_context.grid->ShuffleDeck();
+            m_context.grid->ResetCardStates();
+            m_sceneManager.RequestSceneChange(
+                std::make_unique<GameScene>(m_sceneManager, m_context));
+        }
+    ));
+
+    SDL_FRect tmpButton2 =
+    {
+        static_cast<float>(m_context.windowWidth) * 0.75f,
+        static_cast<float>(m_context.windowHeight) * 0.75f,
+        static_cast<float>(m_context.texWidth) * 0.5f,
+        static_cast<float>(m_context.texHeight) * 0.5f
+    };
+    SDL_Texture* play2 = m_context.assetManager->GetTexture("UI_QuitButton");
+    m_ui.push_back(std::make_unique<Button>(
+        tmpButton2,
+        play2,
+        [this]() {
+            m_sceneManager.RequestQuit();
+        }
+    ));
+}
 
 void EndScene::HandleEvent(const SDL_Event &event)
 {
     if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN)
     {
-        SDL_FPoint p {event.button.x, event.button.y};
-
-        if (SDL_PointInRectFloat(&p, &m_uiPlayButtonRect))
+        for (const auto& element : m_ui)
         {
-            m_context.grid->ShuffleDeck();
-            m_context.grid->ResetCardStates();
-            m_sceneManager.RequestSceneChange(std::make_unique<GameScene>(m_sceneManager, m_context));
+            element->HandleEvent(event);
         }
-
-        else if (SDL_PointInRectFloat(&p, &m_uiQuitButtonRect))
-            m_sceneManager.RequestQuit();
     }
 }
 
@@ -39,13 +73,10 @@ void EndScene::Render(SDL_Renderer *renderer)
     SDL_RenderDebugText(m_context.renderer, middle, middle, text);
     SDL_SetRenderScale(m_context.renderer, 1.0f, 1.0f);
 
-    // PlayButton
-    SDL_Texture* play = m_context.assetManager->GetTexture("UI_PlayButton");
-    SDL_RenderTexture(m_context.renderer, play, nullptr, &m_uiPlayButtonRect);
-
-    // QuitButton
-    SDL_Texture* quit = m_context.assetManager->GetTexture("UI_QuitButton");
-    SDL_RenderTexture(m_context.renderer, quit, nullptr, &m_uiQuitButtonRect);
+    for (const auto& element : m_ui)
+    {
+        element->Render(renderer);
+    }
 
     SDL_RenderPresent(m_context.renderer);
 }
