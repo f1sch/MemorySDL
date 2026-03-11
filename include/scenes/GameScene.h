@@ -2,6 +2,9 @@
 #define MEMORYSDL_GAMESCENE_H
 #include "scenes/Scene.h"
 #include "scenes/SceneManager.h"
+#include "ui/GridLayout.h"
+
+#include <memory>
 
 constexpr auto MAX_ATTEMPTS = 5;
 
@@ -38,6 +41,7 @@ private:
     static constexpr Uint64 m_revealDelayMs = 800;
 
     // UI
+    std::unique_ptr<GridLayout> m_grid;
     std::vector<SDL_FRect> m_uiHeartRects; // TODO: refactor to UIElement
 };
 

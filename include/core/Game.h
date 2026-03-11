@@ -7,7 +7,6 @@
 #include <memory>
 
 class AssetManager;
-class GridLayout;
 class SceneManager;
 class SoundSystem;
 
@@ -33,7 +32,6 @@ private:
 
 	// Systems
 	std::unique_ptr<AssetManager> m_assetManager;
-	std::unique_ptr<GridLayout> m_grid;
 	std::unique_ptr<SoundSystem> m_soundSystem;
 	std::unique_ptr<SceneManager> m_sceneManager;
 

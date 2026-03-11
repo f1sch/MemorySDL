@@ -7,6 +7,24 @@
 
 void GameScene::Init()
 {
+    // TODO: frontCards exists in Game.cpp and here.
+    // This has to be refactored. This is only for testing now
+    // As long as fronCards is the same in both files, it is ensured which cards are to be loaded
+    const std::vector<std::string> frontCards
+    { "Card_Skull", "Card_Coffin", "Card_Candle", "Card_Dagger", "Card_Bat", "Card_Door" };
+
+    constexpr int numOfCards = 6; // set to number of cards that will be rendered
+    std::vector<std::string> testingCards{};
+    for (int i{}; i < numOfCards; ++i)
+    {
+        testingCards.push_back(frontCards[i]);
+    }
+
+    m_grid = std::make_unique<GridLayout>(numOfCards/2, 4); // TODO: rows, cols should be parameters for GridLayout::InitGrid()
+    m_grid->BuildDeck(testingCards); // TODO: move to CardDeck class
+    m_grid->ShuffleDeck(); // TODO: move to CardDeck class
+    m_grid->InitGrid(m_context.windowWidth, m_context.windowHeight, m_context.texWidth, m_context.texHeight);
+
     constexpr auto size = static_cast<size_t>(MAX_ATTEMPTS);
     m_uiHeartRects.resize(size);
     for (size_t i = 0; i < size; ++i)
@@ -30,17 +48,17 @@ void GameScene::HandleEvent(const SDL_Event &event)
 
         const SDL_FPoint p = { event.button.x,event.button.y };
 
-        const int size = static_cast<int>(m_context.grid->GetSize());
+        const int size = static_cast<int>(m_grid->GetSize());
         for (int i = 0; i < size; ++i)
         {
-            Card& card = m_context.grid->m_cards.at(i);
+            Card& card = m_grid->m_cards.at(i);
 
             // Only HitTest Cards that are face down
             if (card.state != CardState::FaceDown)
                 continue;
 
             // Check if Grid was hit
-            const auto& [gx, gy, gw, gh] = m_context.grid->m_grid.at(i);
+            const auto& [gx, gy, gw, gh] = m_grid->m_grid.at(i);
             SDL_FRect rc{ gx, gy, gw, gh};
             if (!SDL_PointInRectFloat(&p, &rc))
                 continue;
@@ -84,8 +102,8 @@ void GameScene::Update(float dt)
         case CardSelected::TwoCards:
             if (SDL_GetTicks() >= m_resolveCardsAtMs)
             {
-                Card& a = m_context.grid->m_cards.at(m_firstCardIdx);
-                Card& b = m_context.grid->m_cards.at(m_secondCardIdx);
+                Card& a = m_grid->m_cards.at(m_firstCardIdx);
+                Card& b = m_grid->m_cards.at(m_secondCardIdx);
 
                 if (a.pairId == b.pairId)
                 {
@@ -104,7 +122,7 @@ void GameScene::Update(float dt)
                 m_secondCardIdx = -1;
                 m_cardsSelected = CardSelected::NoCard;
 
-                if (m_numOfCardsMatched == m_context.grid->GetSize())
+                if (m_numOfCardsMatched == m_grid->GetSize())
                 {
                     m_sceneManager.RequestSceneChange(std::make_unique<EndScene>(m_sceneManager, m_context));
                 }
@@ -121,11 +139,11 @@ void GameScene::Render(SDL_Renderer *renderer)
     // Iterate over GridLayout and render
     SDL_Texture* cardBack = m_context.assetManager->GetTexture("Card_Back");
     SDL_Texture* cardRender{};
-    const int size = static_cast<int>(m_context.grid->GetSize());
+    const int size = static_cast<int>(m_grid->GetSize());
     for (int i = 0; i < size; ++i)
     {
-        auto& card = m_context.grid->m_cards.at(i);
-        auto& rect = m_context.grid->m_grid.at(i);
+        auto& card = m_grid->m_cards.at(i);
+        auto& rect = m_grid->m_grid.at(i);
 
         if (card.state != CardState::FaceDown)
             cardRender = m_context.assetManager->GetTexture(card.frontKey);
