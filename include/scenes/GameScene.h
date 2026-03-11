@@ -1,5 +1,6 @@
 #ifndef MEMORYSDL_GAMESCENE_H
 #define MEMORYSDL_GAMESCENE_H
+#include "game/CardDeck.h"
 #include "scenes/Scene.h"
 #include "scenes/SceneManager.h"
 #include "ui/GridLayout.h"
@@ -39,6 +40,9 @@ private:
 
     Uint64 m_resolveCardsAtMs;
     static constexpr Uint64 m_revealDelayMs = 800;
+
+    std::unique_ptr<CardDeck> m_deck;
+    std::vector<Card> m_cards;
 
     // UI
     std::unique_ptr<GridLayout> m_grid;
