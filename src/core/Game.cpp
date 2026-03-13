@@ -1,7 +1,6 @@
 //#include "pch.h"
 #include "core/Game.h"
 
-#include "ui/GridLayout.h"
 #include "scenes/SceneManager.h"
 #include "scenes/StartScene.h"
 #include "systems/AssetManager.h"
@@ -21,7 +20,7 @@ constexpr auto TEX_HEIGHT = 32 * 3;
 
 Game::Game(SDL_Window* window, SDL_Renderer* renderer, const int width, const int height)
     : m_window(window), m_renderer(renderer),
-      m_windowWidth(width), m_windowHeight(height), m_gameContext(nullptr, nullptr, nullptr, nullptr, 0, 0, 0, 0)
+      m_windowWidth(width), m_windowHeight(height), m_gameContext(nullptr, nullptr, /*nullptr,*/ nullptr, 0, 0, 0, 0)
 {
 }
 
@@ -32,18 +31,15 @@ Game::~Game()
 
 int Game::Init()
 {
-    const std::vector<std::string> frontCards = { "Card_Skull", "Card_Coffin", "Card_Candle", "Card_Dagger", "Card_Bat", "Card_Door" };
-    
+    const std::vector<std::string> frontCards
+    { "Card_Skull", "Card_Coffin", "Card_Candle", "Card_Dagger", "Card_Bat", "Card_Door" };
+
     m_assetManager = std::make_unique<AssetManager>(m_renderer);
     m_assetManager->LoadTexture("Card_Back");
-    
-    // TESTING:
-    constexpr int numOfCards = 6; // set to number of cards that will be rendered
-    std::vector<std::string> testingCards{};
-    for (int i{}; i < numOfCards; ++i)
+
+    for (const auto& tex : frontCards)
     {
-        m_assetManager->LoadTexture(frontCards[i]);
-        testingCards.push_back(frontCards[i]);
+        m_assetManager->LoadTexture(tex);
     }
     const std::vector<std::string> uiTextures = { "UI_PlayButton", "UI_QuitButton", "UI_Heart"};
     for (const auto& tex : uiTextures)
@@ -51,17 +47,11 @@ int Game::Init()
         m_assetManager->LoadTexture(tex);
     }
 
-    m_grid = std::make_unique<GridLayout>(numOfCards/2, 4);
-    m_grid->BuildDeck(testingCards);
-    m_grid->ShuffleDeck();
-    m_grid->InitGrid(m_windowWidth, m_windowHeight, TEX_WIDTH, TEX_HEIGHT);
-
     m_soundSystem = std::make_unique<SoundSystem>();
     m_soundSystem->Init();
 
     m_gameContext.renderer = m_renderer;
     m_gameContext.assetManager = m_assetManager.get();
-    m_gameContext.grid = m_grid.get();
     m_gameContext.soundSystem = m_soundSystem.get();
     m_gameContext.windowWidth = m_windowWidth;
     m_gameContext.windowHeight = m_windowHeight;
@@ -107,7 +97,7 @@ int Game::Update() const
 void Game::Resize()
 {
     SDL_GetWindowSizeInPixels(m_window, &m_windowWidth, &m_windowHeight);
-    m_grid->InitGrid(m_windowWidth, m_windowHeight, TEX_WIDTH, TEX_HEIGHT);
+    //m_grid->InitGrid(m_windowWidth, m_windowHeight, TEX_WIDTH, TEX_HEIGHT);
 }
 
 void Game::HandleEvent(const SDL_Event &event) const

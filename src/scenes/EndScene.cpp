@@ -19,8 +19,6 @@ void EndScene::InitUI()
         tmpButton,
         play,
         [this]() {
-            m_context.grid->ShuffleDeck();
-            m_context.grid->ResetCardStates();
             m_sceneManager.RequestSceneChange(
                 std::make_unique<GameScene>(m_sceneManager, m_context));
         }

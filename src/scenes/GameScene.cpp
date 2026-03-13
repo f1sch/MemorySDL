@@ -1,12 +1,44 @@
 #include "scenes/GameScene.h"
 
-#include "ui/Card.h"
+#include "game/Card.h"
 #include "scenes/EndScene.h"
+#include "SDL3/SDL_log.h"
 
 #include "SDL3/SDL_timer.h"
 
 void GameScene::Init()
 {
+    // TODO: frontCards exists in Game.cpp and here.
+    // This has to be refactored. This is only for testing now
+    // As long as fronCards is the same in both files, it is ensured which cards are to be loaded
+    const std::vector<std::string> frontCards
+    { "Card_Skull", "Card_Coffin", "Card_Candle", "Card_Dagger", "Card_Bat", "Card_Door" };
+
+    constexpr int numOfCards = 6; // set to number of cards that will be rendered
+    std::vector<std::string> testingCards{};
+    for (int i{}; i < numOfCards; ++i)
+    {
+        testingCards.push_back(frontCards[i]);
+    }
+
+    m_grid = std::make_unique<GridLayout>(numOfCards/2, 4);
+    m_grid->InitGrid(m_context.windowWidth, m_context.windowHeight, m_context.texWidth, m_context.texHeight);
+
+    m_deck = std::make_unique<CardDeck>();
+    m_deck->BuildDeck(testingCards);
+    m_deck->ShuffleDeck();
+
+    auto& cards = m_deck->GetCards();
+    auto& rects = m_grid->GetRects();
+
+    SDL_Texture* back = m_context.assetManager->GetTexture("Card_Back");
+    m_cards.reserve(cards.size());
+    for (size_t i = 0; i <cards.size(); ++i)
+    {
+        SDL_Texture* front = m_context.assetManager->GetTexture(cards.at(i).frontKey);
+        m_cards.emplace_back(cards.at(i), rects.at(i), front, back);
+    }
+
     constexpr auto size = static_cast<size_t>(MAX_ATTEMPTS);
     m_uiHeartRects.resize(size);
     for (size_t i = 0; i < size; ++i)
@@ -30,28 +62,27 @@ void GameScene::HandleEvent(const SDL_Event &event)
 
         const SDL_FPoint p = { event.button.x,event.button.y };
 
-        const int size = static_cast<int>(m_context.grid->GetSize());
+        const int size = static_cast<int>(m_cards.size());
         for (int i = 0; i < size; ++i)
         {
-            Card& card = m_context.grid->m_cards.at(i);
+            Card& card = m_cards.at(i);
 
             // Only HitTest Cards that are face down
-            if (card.state != CardState::FaceDown)
+            if (card.IsFaceUp())
                 continue;
 
-            // Check if Grid was hit
-            const auto& [gx, gy, gw, gh] = m_context.grid->m_grid.at(i);
-            SDL_FRect rc{ gx, gy, gw, gh};
+            SDL_FRect rc = card.GetRect();
             if (!SDL_PointInRectFloat(&p, &rc))
                 continue;
-
+            // SDL_Log("Card clicked-> pos: %d, tex: %s", i, card.GetTexName()); // NOTE: testing
             // Do nothing if the same Card is clicked repeatedly
             if (m_cardsSelected == CardSelected::OneCard && m_firstCardIdx == i)
                 return;
 
             m_context.soundSystem->PlaySfxSound(SoundSystem::SoundId::CardFlip);
 
-            card.state = CardState::FaceUp;
+            if (!card.TryFlip())
+                continue;
 
             // Current Card is the first Card that was clicked
             if (m_cardsSelected == CardSelected::NoCard)
@@ -84,19 +115,19 @@ void GameScene::Update(float dt)
         case CardSelected::TwoCards:
             if (SDL_GetTicks() >= m_resolveCardsAtMs)
             {
-                Card& a = m_context.grid->m_cards.at(m_firstCardIdx);
-                Card& b = m_context.grid->m_cards.at(m_secondCardIdx);
+                auto& a = m_cards[m_firstCardIdx];
+                auto& b = m_cards[m_secondCardIdx];
 
-                if (a.pairId == b.pairId)
+                if (a.GetPairId() == b.GetPairId())
                 {
-                    a.state = CardState::Matched;
-                    b.state = CardState::Matched;
+                    a.SetMatched();
+                    b.SetMatched();
                     m_numOfCardsMatched += 2;
                 }
                 else
                 {
-                    a.state = CardState::FaceDown;
-                    b.state = CardState::FaceDown;
+                    a.FlipDown();
+                    b.FlipDown();
                     m_attempts--;
                 }
 
@@ -104,7 +135,7 @@ void GameScene::Update(float dt)
                 m_secondCardIdx = -1;
                 m_cardsSelected = CardSelected::NoCard;
 
-                if (m_numOfCardsMatched == m_context.grid->GetSize())
+                if (m_numOfCardsMatched == m_grid->GetSize())
                 {
                     m_sceneManager.RequestSceneChange(std::make_unique<EndScene>(m_sceneManager, m_context));
                 }
@@ -118,21 +149,9 @@ void GameScene::Render(SDL_Renderer *renderer)
     SDL_SetRenderDrawColor(m_context.renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
     SDL_RenderClear(m_context.renderer);
 
-    // Iterate over GridLayout and render
-    SDL_Texture* cardBack = m_context.assetManager->GetTexture("Card_Back");
-    SDL_Texture* cardRender{};
-    const int size = static_cast<int>(m_context.grid->GetSize());
-    for (int i = 0; i < size; ++i)
+    for (auto& card : m_cards)
     {
-        auto& card = m_context.grid->m_cards.at(i);
-        auto& rect = m_context.grid->m_grid.at(i);
-
-        if (card.state != CardState::FaceDown)
-            cardRender = m_context.assetManager->GetTexture(card.frontKey);
-        else
-            cardRender = cardBack;
-
-        SDL_RenderTexture(m_context.renderer, cardRender, nullptr, &rect);
+        card.Render(m_context.renderer);
     }
 
     // Render Attempts

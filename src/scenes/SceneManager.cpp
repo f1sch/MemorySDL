@@ -25,6 +25,7 @@ void SceneManager::Update(const float dt)
 
         m_currentScene = std::move(m_nextScene);
         m_currentScene->OnEnter();
+        // TODO: return here? does this immediately run the update() of the nextScene beforce currentScene update() returns?
     }
     if (m_currentScene)
         m_currentScene->Update(dt);

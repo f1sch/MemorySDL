@@ -1,7 +1,11 @@
 #ifndef MEMORYSDL_GAMESCENE_H
 #define MEMORYSDL_GAMESCENE_H
+#include "game/CardDeck.h"
 #include "scenes/Scene.h"
 #include "scenes/SceneManager.h"
+#include "ui/GridLayout.h"
+
+#include <memory>
 
 constexpr auto MAX_ATTEMPTS = 5;
 
@@ -37,7 +41,11 @@ private:
     Uint64 m_resolveCardsAtMs;
     static constexpr Uint64 m_revealDelayMs = 800;
 
+    std::unique_ptr<CardDeck> m_deck;
+    std::vector<Card> m_cards;
+
     // UI
+    std::unique_ptr<GridLayout> m_grid;
     std::vector<SDL_FRect> m_uiHeartRects; // TODO: refactor to UIElement
 };
 
