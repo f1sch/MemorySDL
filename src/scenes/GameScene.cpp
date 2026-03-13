@@ -2,6 +2,7 @@
 
 #include "game/Card.h"
 #include "scenes/EndScene.h"
+#include "SDL3/SDL_log.h"
 
 #include "SDL3/SDL_timer.h"
 
@@ -67,13 +68,13 @@ void GameScene::HandleEvent(const SDL_Event &event)
             Card& card = m_cards.at(i);
 
             // Only HitTest Cards that are face down
-            if (!card.IsFaceDown())
+            if (card.IsFaceUp())
                 continue;
 
             SDL_FRect rc = card.GetRect();
             if (!SDL_PointInRectFloat(&p, &rc))
                 continue;
-
+            //SDL_Log("Card clicked-> pos: %d, tex: %s", i, card.GetTexName()); // NOTE: testing
             // Do nothing if the same Card is clicked repeatedly
             if (m_cardsSelected == CardSelected::OneCard && m_firstCardIdx == i)
                 return;

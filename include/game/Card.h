@@ -23,6 +23,7 @@ public:
 	[[nodiscard]] bool IsFaceDown() const { return m_state == CardState::FaceDown; }
 	[[nodiscard]] bool IsFaceUp() const { return m_state == CardState::FaceUp; }
 
+	//[[nodiscard]] const char *GetTexName() const { return m_data.frontKey.c_str(); } // NOTE: for testing
 	[[nodiscard]] int GetPairId() const { return m_data.pairId; }
 	[[nodiscard]] SDL_FRect GetRect() const { return m_rect; }
 

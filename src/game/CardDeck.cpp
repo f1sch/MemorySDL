@@ -12,9 +12,8 @@ void CardDeck::BuildDeck(const std::vector<std::string> &frontKeys)
     int uniqueId = 0;
     for (const auto& key : frontKeys)
     {
-        CardData data {uniqueId++, pairId, key, 0.0f};
-        m_cards.push_back(data);
-        m_cards.push_back(data);
+        m_cards.push_back({uniqueId++, pairId, key, 0.0f});
+        m_cards.push_back({uniqueId++, pairId, key, 0.0f});
         ++pairId;
     }
 }

@@ -2,8 +2,12 @@
 
 void Card::Render(SDL_Renderer *renderer) const
 {
-    SDL_Texture* tex =
-        (m_state == CardState::FaceUp) ? m_front : m_back;
+    SDL_Texture* tex;
+    if (m_state == CardState::FaceUp || m_state == CardState::Matched)
+        tex = m_front;
+    else
+        tex = m_back;
+
 
     SDL_RenderTexture(renderer, tex, nullptr, &m_rect);
 }
