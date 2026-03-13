@@ -21,7 +21,7 @@ void GameScene::Init()
         testingCards.push_back(frontCards[i]);
     }
 
-    m_grid = std::make_unique<GridLayout>(numOfCards/2, 4); // TODO: rows, cols should be parameters for GridLayout::InitGrid()
+    m_grid = std::make_unique<GridLayout>(numOfCards/2, 4);
     m_grid->InitGrid(m_context.windowWidth, m_context.windowHeight, m_context.texWidth, m_context.texHeight);
 
     m_deck = std::make_unique<CardDeck>();
@@ -74,7 +74,7 @@ void GameScene::HandleEvent(const SDL_Event &event)
             SDL_FRect rc = card.GetRect();
             if (!SDL_PointInRectFloat(&p, &rc))
                 continue;
-            //SDL_Log("Card clicked-> pos: %d, tex: %s", i, card.GetTexName()); // NOTE: testing
+            // SDL_Log("Card clicked-> pos: %d, tex: %s", i, card.GetTexName()); // NOTE: testing
             // Do nothing if the same Card is clicked repeatedly
             if (m_cardsSelected == CardSelected::OneCard && m_firstCardIdx == i)
                 return;

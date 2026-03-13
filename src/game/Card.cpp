@@ -8,7 +8,6 @@ void Card::Render(SDL_Renderer *renderer) const
     else
         tex = m_back;
 
-
     SDL_RenderTexture(renderer, tex, nullptr, &m_rect);
 }
 

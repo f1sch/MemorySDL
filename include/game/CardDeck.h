@@ -10,8 +10,7 @@
 class CardDeck
 {
 public:
-    CardDeck()
-        :m_rng(std::random_device{}())
+    CardDeck() : m_rng(std::random_device{}())
     {}
 
     void BuildDeck(const std::vector<std::string>& frontKeys);
@@ -23,6 +22,5 @@ private:
     std::vector<CardData> m_cards;
     std::mt19937 m_rng;
 };
-
 
 #endif //MEMORYSDL_CARDDECK_H
