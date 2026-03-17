@@ -1,11 +1,14 @@
 # Memory in SDL3
-
 ![Screenshot of the game](in_game.png)
 
-This is a simple Memory game with creepy themes.
+This is a simple Memory game with scary themes, developed with Simple DirectMedia Layer (SDL3).
 
-It is developed with Simple DirectMedia Layer (SDL3).
+I am building this project to improve my system design and architecture skills. 
 
+And also for the fun of it, of course.
+
+I deliberately avoided game engines for this project, allowing me implement everything that I want myself. 
+***
 All used assets are made by me.
 
 ## Playing the game
