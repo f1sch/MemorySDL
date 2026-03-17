@@ -1,5 +1,4 @@
-#ifndef MEMORYSDL_ENDSCENE_H
-#define MEMORYSDL_ENDSCENE_H
+#pragma once
 #include "scenes/Scene.h"
 
 #include "ui/UIElement.h"
@@ -27,5 +26,3 @@ private:
     // UI
     std::vector<std::unique_ptr<UIElement>> m_ui;
 };
-
-#endif //MEMORYSDL_ENDSCENE_H

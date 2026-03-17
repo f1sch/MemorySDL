@@ -1,5 +1,4 @@
-#ifndef MEMORYSDL_SCENE_H
-#define MEMORYSDL_SCENE_H
+#pragma once
 #include "core/GameContext.h"
 
 #include "SDL3/SDL_render.h"
@@ -22,5 +21,3 @@ public:
 protected:
     GameContext& m_context;
 };
-
-#endif //MEMORYSDL_SCENE_H

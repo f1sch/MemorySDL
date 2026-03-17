@@ -1,5 +1,4 @@
-#ifndef MEMORYSDL_CARDDATA_H
-#define MEMORYSDL_CARDDATA_H
+#pragma once
 #include <string>
 
 struct CardData
@@ -9,5 +8,3 @@ struct CardData
     std::string frontKey;
     float rotation = 0.f;
 };
-
-#endif //MEMORYSDL_CARDDATA_H

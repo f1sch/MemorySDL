@@ -1,5 +1,4 @@
-#ifndef MEMORYSDL_STARTSCENE_H
-#define MEMORYSDL_STARTSCENE_H
+#pragma once
 #include "scenes/Scene.h"
 
 #include "ui/Button.h"
@@ -29,5 +28,3 @@ private:
     // UI
     std::vector<std::unique_ptr<UIElement>> m_ui;
 };
-
-#endif //MEMORYSDL_STARTSCENE_H

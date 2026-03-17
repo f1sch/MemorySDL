@@ -1,5 +1,4 @@
-#ifndef MEMORYSDL_UIATTEMPTS_H
-#define MEMORYSDL_UIATTEMPTS_H
+#pragma once
 #include "ui/UIImage.h"
 #include "core/GameContext.h"
 
@@ -27,5 +26,3 @@ private:
     int m_maxAttempts;
     int m_attempts;
 };
-
-#endif //MEMORYSDL_UIATTEMPTS_H

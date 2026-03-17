@@ -1,5 +1,4 @@
-#ifndef MEMORYSDL_GAMESCENE_H
-#define MEMORYSDL_GAMESCENE_H
+#pragma once
 #include "game/CardDeck.h"
 #include "scenes/Scene.h"
 #include "scenes/SceneManager.h"
@@ -51,5 +50,3 @@ private:
     std::unique_ptr<GridLayout> m_grid;
     std::unique_ptr<UIAttempts> m_uiAttempts;
 };
-
-#endif //MEMORYSDL_GAMESCENE_H

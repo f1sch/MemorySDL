@@ -1,5 +1,4 @@
-#ifndef MEMORYSDL_BUTTON_H
-#define MEMORYSDL_BUTTON_H
+#pragma once
 #include "UIElement.h"
 
 #include <functional>
@@ -20,5 +19,3 @@ private:
     SDL_Texture* m_texture;
     std::function<void()> m_onClick;
 };
-
-#endif //MEMORYSDL_BUTTON_H

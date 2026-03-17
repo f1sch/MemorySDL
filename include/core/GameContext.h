@@ -1,5 +1,4 @@
-#ifndef MEMORYSDL_GAMECONTEXT_H
-#define MEMORYSDL_GAMECONTEXT_H
+#pragma once
 #include "systems/AssetManager.h"
 #include "systems/SoundSystem.h"
 
@@ -23,5 +22,3 @@ struct GameContext
           texHeight(th)
     {}
 };
-
-#endif //MEMORYSDL_GAMECONTEXT_H

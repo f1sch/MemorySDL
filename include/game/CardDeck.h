@@ -1,6 +1,4 @@
-#ifndef MEMORYSDL_CARDDECK_H
-#define MEMORYSDL_CARDDECK_H
-
+#pragma once
 #include "game/Card.h"
 
 #include <random>
@@ -22,5 +20,3 @@ private:
     std::vector<CardData> m_cards;
     std::mt19937 m_rng;
 };
-
-#endif //MEMORYSDL_CARDDECK_H

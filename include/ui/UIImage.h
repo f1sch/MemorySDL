@@ -1,5 +1,4 @@
-#ifndef MEMORYSDL_IMAGE_H
-#define MEMORYSDL_IMAGE_H
+#pragma once
 #include "UIElement.h"
 
 class UIImage : public UIElement
@@ -17,5 +16,3 @@ private:
     SDL_Texture* m_texture;
     SDL_FRect m_rect{};
 };
-
-#endif //MEMORYSDL_IMAGE_H
