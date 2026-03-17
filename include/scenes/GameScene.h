@@ -7,6 +7,9 @@
 
 #include <memory>
 
+#include "ui/UIAttempts.h"
+#include "ui/UIElement.h"
+
 constexpr auto MAX_ATTEMPTS = 5;
 
 class GameScene : public Scene
@@ -46,7 +49,7 @@ private:
 
     // UI
     std::unique_ptr<GridLayout> m_grid;
-    std::vector<SDL_FRect> m_uiHeartRects; // TODO: refactor to UIElement
+    std::unique_ptr<UIAttempts> m_uiAttempts;
 };
 
 #endif //MEMORYSDL_GAMESCENE_H

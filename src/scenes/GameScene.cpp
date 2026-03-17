@@ -2,8 +2,8 @@
 
 #include "game/Card.h"
 #include "scenes/EndScene.h"
-#include "SDL3/SDL_log.h"
 
+#include "SDL3/SDL_log.h"
 #include "SDL3/SDL_timer.h"
 
 void GameScene::Init()
@@ -39,17 +39,8 @@ void GameScene::Init()
         m_cards.emplace_back(cards.at(i), rects.at(i), front, back);
     }
 
-    constexpr auto size = static_cast<size_t>(MAX_ATTEMPTS);
-    m_uiHeartRects.resize(size);
-    for (size_t i = 0; i < size; ++i)
-    {
-        m_uiHeartRects[i].x = (static_cast<float>(m_context.windowWidth) * 0.5f + static_cast<float>(
-                                   m_context.texWidth * i) - static_cast<float>(m_context.texWidth * m_attempts) /
-                               2);
-        m_uiHeartRects[i].y = static_cast<float>(m_context.windowHeight) * 0.001f;
-        m_uiHeartRects[i].w = static_cast<float>(m_context.texWidth);
-        m_uiHeartRects[i].h = static_cast<float>(m_context.texHeight);
-    }
+    SDL_Texture* heart = m_context.assetManager->GetTexture("UI_Heart");
+    m_uiAttempts = std::make_unique<UIAttempts>(m_context, heart, MAX_ATTEMPTS);
 }
 
 void GameScene::HandleEvent(const SDL_Event &event)
@@ -129,6 +120,8 @@ void GameScene::Update(float dt)
                     a.FlipDown();
                     b.FlipDown();
                     m_attempts--;
+                    // TODO: GameScene and UIAttempts have to have a synced number of attempts. this does not feel good
+                    m_uiAttempts->SetAttempts(m_attempts);
                 }
 
                 m_firstCardIdx = -1;
@@ -149,17 +142,15 @@ void GameScene::Render(SDL_Renderer *renderer)
     SDL_SetRenderDrawColor(m_context.renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
     SDL_RenderClear(m_context.renderer);
 
+    // Game Objects
     for (auto& card : m_cards)
     {
         card.Render(m_context.renderer);
     }
 
-    // Render Attempts
-    const auto tex = m_context.assetManager->GetTexture("UI_Heart");
-    for (int i = 0; i < m_attempts; ++i)
-    {
-        SDL_RenderTexture(m_context.renderer, tex, nullptr, &m_uiHeartRects[i]);
-    }
+    // UI
+    m_uiAttempts->Render(renderer);
+
     // TODO: Render Time
 
     SDL_RenderPresent(m_context.renderer);
