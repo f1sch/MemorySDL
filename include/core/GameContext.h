@@ -1,6 +1,4 @@
-#ifndef MEMORYSDL_GAMECONTEXT_H
-#define MEMORYSDL_GAMECONTEXT_H
-#include "ui/GridLayout.h"
+#pragma once
 #include "systems/AssetManager.h"
 #include "systems/SoundSystem.h"
 
@@ -10,7 +8,6 @@ struct GameContext
 {
     SDL_Renderer *renderer;
     AssetManager *assetManager;
-    GridLayout *grid;
     SoundSystem *soundSystem;
 
     int windowWidth;
@@ -18,12 +15,10 @@ struct GameContext
     int texWidth;
     int texHeight;
 
-    GameContext(SDL_Renderer* r, AssetManager *am, GridLayout *gl, SoundSystem *ss,
+    GameContext(SDL_Renderer* r, AssetManager *am, SoundSystem *ss,
         const int wWidth, const int wHeight, const int tw, const int th)
-        : renderer(r), assetManager(am), grid(gl), soundSystem(ss), windowWidth(wWidth),
+        : renderer(r), assetManager(am), soundSystem(ss), windowWidth(wWidth),
           windowHeight(wHeight), texWidth(tw),
           texHeight(th)
     {}
 };
-
-#endif //MEMORYSDL_GAMECONTEXT_H

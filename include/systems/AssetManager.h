@@ -7,20 +7,6 @@
 
 class AssetManager
 {
-	//enum class TextureID
-	//{
-	//	UI_Heart,
-	//	UI_PlayButton,
-	//	UI_QuitButton,
-	//	Card_Back,
-	//	Card_Bat,
-	//	Card_Candle,
-	//	Card_Coffin,
-	//	Card_Dagger,
-	//	Card_Door,
-	//	Card_Skull
-	//};
-
 public:
 	explicit AssetManager(SDL_Renderer* renderer);
 	~AssetManager();

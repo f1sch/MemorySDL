@@ -1,7 +1,13 @@
-#ifndef MEMORYSDL_GAMESCENE_H
-#define MEMORYSDL_GAMESCENE_H
+#pragma once
+#include "game/CardDeck.h"
 #include "scenes/Scene.h"
 #include "scenes/SceneManager.h"
+#include "ui/GridLayout.h"
+
+#include <memory>
+
+#include "ui/UIAttempts.h"
+#include "ui/UIElement.h"
 
 constexpr auto MAX_ATTEMPTS = 5;
 
@@ -9,24 +15,16 @@ class GameScene : public Scene
 {
 public:
     explicit GameScene(SceneManager &manager, GameContext &context)
-        : Scene(context), m_sceneManager(manager), m_gameState(GameState::Paused), m_numOfCardsMatched(0),
+        : Scene(context), m_sceneManager(manager), m_numOfCardsMatched(0),
           m_cardsSelected(CardSelected::NoCard),
           m_firstCardIdx(-1),
-          m_secondCardIdx(-1), m_resolveCardsAtMs(0),
-          m_attempts(MAX_ATTEMPTS)
+          m_secondCardIdx(-1), m_attempts(MAX_ATTEMPTS),
+          m_resolveCardsAtMs(0)
     {
-        constexpr auto size = static_cast<size_t>(MAX_ATTEMPTS);
-        m_uiHeartRects.resize(size);
-        for (size_t i = 0; i < size; ++i) {
-            m_uiHeartRects[i].x = (static_cast<float>(m_context.windowWidth) * 0.5f + static_cast<float>(
-                                       m_context.texWidth * i) - static_cast<float>(m_context.texWidth * m_attempts) /
-                                   2);
-            m_uiHeartRects[i].y = static_cast<float>(m_context.windowHeight) * 0.001f;
-            m_uiHeartRects[i].w = static_cast<float>(m_context.texWidth);
-            m_uiHeartRects[i].h = static_cast<float>(m_context.texHeight);
-        }
+        Init();
     }
 
+    void Init();
     void HandleEvent(const SDL_Event &event) override;
     void Update(float dt) override;
     void Render(SDL_Renderer *renderer) override;
@@ -34,20 +32,21 @@ public:
 private:
     SceneManager &m_sceneManager;
 
-    enum class GameState { Running, Ended, Paused, Starting };
-    GameState m_gameState;
-
+    // State
     enum class CardSelected { NoCard, OneCard, TwoCards };
     size_t m_numOfCardsMatched;
     CardSelected m_cardsSelected;
     int m_firstCardIdx;
     int m_secondCardIdx;
+    int m_attempts;
 
     Uint64 m_resolveCardsAtMs;
     static constexpr Uint64 m_revealDelayMs = 800;
 
-    std::vector<SDL_FRect> m_uiHeartRects;
-    int m_attempts;
-};
+    std::unique_ptr<CardDeck> m_deck;
+    std::vector<Card> m_cards;
 
-#endif //MEMORYSDL_GAMESCENE_H
+    // UI
+    std::unique_ptr<GridLayout> m_grid;
+    std::unique_ptr<UIAttempts> m_uiAttempts;
+};

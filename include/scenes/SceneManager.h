@@ -1,5 +1,4 @@
-#ifndef MEMORYSDL_SCENEMANAGER_H
-#define MEMORYSDL_SCENEMANAGER_H
+#pragma once
 #include "scenes/Scene.h"
 
 #include <memory>
@@ -23,5 +22,3 @@ private:
 
     bool m_quitRequested = false;
 };
-
-#endif //MEMORYSDL_SCENEMANAGER_H
