@@ -94,7 +94,7 @@ void GameScene::Update(float dt)
 {
     if (m_attempts < 1)
     {
-        m_sceneManager.RequestSceneChange(std::make_unique<EndScene>(m_sceneManager, m_context));
+        m_sceneManager.RequestSceneChange(std::make_unique<EndScene>(m_sceneManager, m_context, false));
         return;
     }
 
@@ -130,7 +130,9 @@ void GameScene::Update(float dt)
 
                 if (m_numOfCardsMatched == m_grid->GetSize())
                 {
-                    m_sceneManager.RequestSceneChange(std::make_unique<EndScene>(m_sceneManager, m_context));
+                    m_sceneManager.RequestSceneChange(
+                        std::make_unique<EndScene>(m_sceneManager, m_context, true)
+                    );
                 }
             }
         default: ;
