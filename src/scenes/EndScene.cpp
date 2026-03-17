@@ -66,7 +66,11 @@ void EndScene::Render(SDL_Renderer *renderer)
 
     // Ending title
     SDL_SetRenderScale(m_context.renderer, 5.f, 5.f);
-    const auto text = "GAME ENDED!";
+    auto text = "";
+    if (m_hasPlayerWon)
+        text = "You Won!";
+    else
+        text = "You Lost!";
     const float middle = ((static_cast<float>(m_context.windowWidth) / 2.0f) / 5.f) - (static_cast<float>(SDL_strlen(text)) * 5.f) / 1.25f;
     SDL_RenderDebugText(m_context.renderer, middle, middle, text);
     SDL_SetRenderScale(m_context.renderer, 1.0f, 1.0f);

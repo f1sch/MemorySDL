@@ -10,8 +10,8 @@
 class EndScene : public Scene
 {
 public:
-    explicit EndScene(SceneManager &manager, GameContext &context)
-        : Scene(context), m_sceneManager(manager)
+    explicit EndScene(SceneManager &manager, GameContext &context, const bool hasPlayerWon)
+        : Scene(context), m_sceneManager(manager), m_hasPlayerWon(hasPlayerWon)
     {
         InitUI();
     }
@@ -23,7 +23,7 @@ public:
 
 private:
     SceneManager &m_sceneManager;
-
+    bool m_hasPlayerWon;
     // UI
     std::vector<std::unique_ptr<UIElement>> m_ui;
 };
