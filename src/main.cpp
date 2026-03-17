@@ -16,8 +16,8 @@
 #include <memory>
 
 // Use this renderer to draw into this window every frame.
-static SDL_Window* g_window = NULL;
-static SDL_Renderer* g_renderer = NULL;
+static SDL_Window* g_window = nullptr;
+static SDL_Renderer* g_renderer = nullptr;
 
 constexpr auto WINDOW_WIDTH = 640;
 constexpr auto WINDOW_HEIGHT = 480;
@@ -28,7 +28,7 @@ std::unique_ptr<Game> g_game = nullptr;
 // This function runs once at startup.
 SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
 {
-    SDL_SetAppMetadata("Spooky Memory", GAME_VERSION, "com.example.spookymemory");
+    SDL_SetAppMetadata("MemorySDL", GAME_VERSION, "com.example.MemorySDL");
 
 
     if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO)) 
